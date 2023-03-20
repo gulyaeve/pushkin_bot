@@ -5,11 +5,12 @@ from aiogram.dispatcher.filters import Text
 from logging import log, INFO
 
 from loader import dp, messages
+from utils.commands import help_message
 
 
 @dp.message_handler(commands=['help'])
 async def help_command(message: types.Message):
-    help_message = await messages.get_message("help_message")
+    # help_message = await messages.get_message("help_message")
     await message.answer(help_message)
 
 

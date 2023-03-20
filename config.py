@@ -27,12 +27,12 @@ class Config:
         rest_token = ""
 
     # Email auth:
-    class Email:
-        email_server = env.str("EMAIL_SERVER")
-        email_port = env.int("EMAIL_PORT")
-        sender_email = env.str("SENDER_EMAIL")
-        email_login = env.str("EMAIL_LOGIN")
-        email_password = env.str("EMAIL_PASSWORD")
+    # class Email:
+    #     email_server = env.str("EMAIL_SERVER")
+    #     email_port = env.int("EMAIL_PORT")
+    #     sender_email = env.str("SENDER_EMAIL")
+    #     email_login = env.str("EMAIL_LOGIN")
+    #     email_password = env.str("EMAIL_PASSWORD")
 
     # PostgreSQL
     class DBConfig:

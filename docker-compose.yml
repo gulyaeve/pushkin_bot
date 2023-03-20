@@ -1,46 +1,48 @@
 version: '3.9'
 
 services:
-#  db:
-#    env_file:
-#      - ".env.dev"
-#    container_name: "database_template_bot"
-#    image: "sameersbn/postgresql"
-#    networks:
-#      - botnet
-#    restart: always
-##    ports:
-##      - "5432:5432"
-#    volumes:
-#      - ./postgres/config:/etc/postgresql
-#      - ./postgres/logs:/var/log/postgresql
-#      - ./postgres/lib:/var/lib/postgresql
+  db:
+    env_file:
+      - ".env.dev"
+    container_name: "database"
+    image: postgres:latest
+    networks:
+      - botnet
+    restart: always
+#    ports:
+#      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
-#  redis:
-#    image: redis:latest
-#    container_name: "redis"
-#    restart: always
-#    volumes:
-#      - ./redis_data:/data
-#    networks:
-#      - botnet
+  redis:
+    image: redis:latest
+    container_name: "redis"
+    restart: always
+    volumes:
+      - redis_data:/data
+    networks:
+      - botnet
 
   bot:
     container_name: "templatebot_dev"
     build:
       context: .
-    network_mode: host
+#    network_mode: host
     restart: always
     env_file:
       - ".env.dev"
     volumes:
       - .:/src
-#    networks:
-#      - botnet
-#    depends_on:
-#      - db
-#      - redis
+    networks:
+      - botnet
+    depends_on:
+      - db
+      - redis
 
-#networks:
-#  botnet:
-#    driver: bridge
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  botnet:
+    driver: bridge
