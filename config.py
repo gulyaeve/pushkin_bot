@@ -53,3 +53,8 @@ class Config:
     except EnvError:
         proxy_url = ""
 
+    # openroute
+    class OpenRouteConfig:
+        OPENROUTE_API_LINK = env.str("OPENROUTE_API_LINK")
+        OPENROUTE_API_TOKEN = env.str("OPENROUTE_API_TOKEN")
+

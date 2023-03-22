@@ -23,7 +23,7 @@ class RestAPI:
                 "Content-Type": "application/json",
             }
 
-    async def _post_json(self, route: str, data: dict | None) -> dict:
+    async def post_json(self, route: str, data: dict | None) -> dict:
         """
         Send post request to host
         :param route: request link
@@ -33,15 +33,16 @@ class RestAPI:
         async with aiohttp.ClientSession(headers=self._headers) as session:
             try:
                 async with session.post(f'{self._link}{route}',
-                                        json=data if data is not None else {}) as post:
+                                        json=data if data is not None else {}, ssl=False) as post:
                     logging.info(f"{post.status} {post.reason} {self._link}{route} {data=}")
                     return await post.json()
             except ClientConnectorError:
+                logging.warning(f"{self._link}{route} {data}")
                 logging.warning(f"Rest api is unreachable")
             except Exception as e:
                 logging.warning(f"Rest api is unreachable: {e}")
 
-    async def _post_file(self, route: str, files) -> dict:
+    async def post_file(self, route: str, files) -> dict:
         """
         Send post request to host
         :param route: request link
@@ -62,7 +63,7 @@ class RestAPI:
         except Exception as e:
             logging.warning(f"Rest api is unreachable: {e}")
 
-    async def _get_json(self, route: str, params: dict | None) -> dict:
+    async def get_json(self, route: str, params: dict | None) -> dict:
         """
         Send get request to host
         :param route: request link
@@ -79,7 +80,7 @@ class RestAPI:
         except Exception as e:
             logging.warning(f"Rest api is unreachable: {e}")
 
-    async def _get_file(self, route: str) -> bytes:
+    async def get_file(self, route: str) -> bytes:
         """
         Download file from server
         :param route: request link

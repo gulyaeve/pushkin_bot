@@ -9,6 +9,7 @@ from utils.db_api.db import Database
 from utils.db_api.usersdb import UsersDB
 from utils.db_api.messages import Messages
 from utils.admin_page_rest_api import AdminPageRestAPI
+from utils.openroute_api import OpenrouteApi
 
 # ChatBot objects
 if Config.proxy_url:
@@ -45,6 +46,8 @@ if Config.rest_link:
     admin_api = AdminPageRestAPI(bot_info.to_python())
 else:
     admin_api = None
+
+openroute_api = OpenrouteApi()
 
 # Logging setup
 logging.basicConfig(
