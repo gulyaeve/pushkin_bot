@@ -1,8 +1,8 @@
-import asyncio
 from dataclasses import dataclass
 
 from config import Config
 from utils.rest_api import RestAPI
+
 
 @dataclass
 class AddressData:
@@ -68,7 +68,6 @@ class OpenrouteApi(RestAPI):
                 label = feature['properties']['label']
                 list_of_addresses.append(AddressData(label, [longitude, latitude]))
         return list_of_addresses
-
 
 # loop = asyncio.get_event_loop()
 # api = OpenrouteApi()

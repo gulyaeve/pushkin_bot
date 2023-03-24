@@ -5,7 +5,7 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 
 from keyboards.keyboards import location_button
 from loader import dp, openroute_api, taxi_fares
-from utils.utilities import taxi_fare_price, make_keyboard_list
+from utils.utilities import taxi_fare_price
 
 
 class OrderTaxi(StatesGroup):
