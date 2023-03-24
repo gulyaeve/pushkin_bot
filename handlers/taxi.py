@@ -24,8 +24,21 @@ async def taxi_set_departure(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['departure_longitude'] = message.location.longitude
         data['departure_latitude'] = message.location.latitude
-    await message.answer("Укажите адрес назначения:")
+    await message.answer("Укажите адрес назначения:", reply_markup=types.ReplyKeyboardRemove())
     await OrderTaxi.Destination.set()
+
+
+@dp.message_handler(state=OrderTaxi.Departure, content_types=types.ContentType.TEXT)
+async def taxi_set_departure(message: types.Message, state: FSMContext):
+    longitude, latitude = await openroute_api.get_coordinates(message.text)
+    if longitude is not None and latitude is not None:
+        async with state.proxy() as data:
+            data['departure_longitude'] = longitude
+            data['departure_latitude'] = latitude
+        await message.answer("Укажите адрес назначения:", reply_markup=types.ReplyKeyboardRemove())
+        await OrderTaxi.Destination.set()
+    else:
+        return await message.answer("Адрес не найден")
 
 
 @dp.message_handler(state=OrderTaxi.Destination, content_types=types.ContentType.LOCATION)
@@ -38,6 +51,22 @@ async def taxi_set_destination(message: types.Message, state: FSMContext):
     keyboard.one_time_keyboard = True
     await message.answer("Выберите тариф:", reply_markup=keyboard)
     await OrderTaxi.Fare.set()
+
+
+@dp.message_handler(state=OrderTaxi.Destination, content_types=types.ContentType.TEXT)
+async def taxi_set_destination(message: types.Message, state: FSMContext):
+    longitude, latitude = await openroute_api.get_coordinates(message.text)
+    if longitude is not None and latitude is not None:
+        async with state.proxy() as data:
+            data['destination_longitude'] = longitude
+            data['destination_latitude'] = latitude
+        fares = await taxi_fares.select_all_taxi_fare_name()
+        keyboard = make_keyboard_list(fares)
+        keyboard.one_time_keyboard = True
+        await message.answer("Выберите тариф:", reply_markup=keyboard)
+        await OrderTaxi.Fare.set()
+    else:
+        return await message.answer("Адрес не найден")
 
 
 @dp.message_handler(state=OrderTaxi.Fare)

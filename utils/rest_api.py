@@ -72,7 +72,8 @@ class RestAPI:
         try:
             async with aiohttp.ClientSession(headers=self._headers) as session:
                 async with session.get(f'{self._link}{route}',
-                                       params=params if params is not None else {}) as resp:
+                                       params=params if params is not None else {},
+                                       ssl=False) as resp:
                     logging.info(f"{resp.status=} {self._link}{route} {params=}")
                     return await resp.json()
         except ClientConnectorError:
