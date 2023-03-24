@@ -1,5 +1,6 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import StatesGroup, State
 
 from keyboards.keyboards import location_button
@@ -30,15 +31,32 @@ async def taxi_set_departure(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=OrderTaxi.Departure, content_types=types.ContentType.TEXT)
 async def taxi_set_departure(message: types.Message, state: FSMContext):
-    longitude, latitude = await openroute_api.get_coordinates(message.text)
-    if longitude is not None and latitude is not None:
-        async with state.proxy() as data:
-            data['departure_longitude'] = longitude
-            data['departure_latitude'] = latitude
-        await message.answer("Укажите адрес назначения:", reply_markup=types.ReplyKeyboardRemove())
-        await OrderTaxi.Destination.set()
+    list_of_addresses = await openroute_api.get_list_of_addresses(message.text)
+    if list_of_addresses:
+        address_keyboard = types.InlineKeyboardMarkup()
+        for address in list_of_addresses:
+            address_keyboard.add(
+                types.InlineKeyboardButton(
+                    text=address.label,
+                    callback_data=f"departure={address.coordinates[0]},{address.coordinates[1]}"
+                )
+            )
+        await message.answer("Выберите искомый адрес:", reply_markup=address_keyboard)
     else:
         return await message.answer("Адрес не найден")
+
+
+@dp.callback_query_handler(Text(startswith="departure="), state=OrderTaxi.Departure)
+async def taxi_set_departure(callback: types.CallbackQuery, state: FSMContext):
+    await callback.message.delete()
+    coordinates = callback.data.split("=")[1]
+    longitude = coordinates.split(",")[0]
+    latitude = coordinates.split(",")[1]
+    async with state.proxy() as data:
+        data['departure_longitude'] = longitude
+        data['departure_latitude'] = latitude
+    await callback.message.answer("Укажите адрес назначения:", reply_markup=types.ReplyKeyboardRemove())
+    await OrderTaxi.Destination.set()
 
 
 @dp.message_handler(state=OrderTaxi.Destination, content_types=types.ContentType.LOCATION)
@@ -47,56 +65,81 @@ async def taxi_set_destination(message: types.Message, state: FSMContext):
         data['destination_longitude'] = message.location.longitude
         data['destination_latitude'] = message.location.latitude
     fares = await taxi_fares.select_all_taxi_fare_name()
-    keyboard = make_keyboard_list(fares)
-    keyboard.one_time_keyboard = True
-    await message.answer("Выберите тариф:", reply_markup=keyboard)
+    fares_keyboard = types.InlineKeyboardMarkup()
+    for fare in fares:
+        fares_keyboard.add(
+            types.InlineKeyboardButton(
+                text=fare,
+                callback_data=f"fare={fare}"
+            )
+        )
+    await message.answer("Выберите тариф:", reply_markup=fares_keyboard)
     await OrderTaxi.Fare.set()
 
 
 @dp.message_handler(state=OrderTaxi.Destination, content_types=types.ContentType.TEXT)
 async def taxi_set_destination(message: types.Message, state: FSMContext):
-    longitude, latitude = await openroute_api.get_coordinates(message.text)
-    if longitude is not None and latitude is not None:
-        async with state.proxy() as data:
-            data['destination_longitude'] = longitude
-            data['destination_latitude'] = latitude
-        fares = await taxi_fares.select_all_taxi_fare_name()
-        keyboard = make_keyboard_list(fares)
-        keyboard.one_time_keyboard = True
-        await message.answer("Выберите тариф:", reply_markup=keyboard)
-        await OrderTaxi.Fare.set()
+    list_of_addresses = await openroute_api.get_list_of_addresses(message.text)
+    if list_of_addresses:
+        address_keyboard = types.InlineKeyboardMarkup()
+        for address in list_of_addresses:
+            address_keyboard.add(
+                types.InlineKeyboardButton(
+                    text=address.label,
+                    callback_data=f"destination={address.coordinates[0]},{address.coordinates[1]}"
+                )
+            )
+        await message.answer("Выберите искомый адрес:", reply_markup=address_keyboard)
     else:
         return await message.answer("Адрес не найден")
 
 
-@dp.message_handler(state=OrderTaxi.Fare)
-async def taxi_set_fare(message: types.Message, state: FSMContext):
-    if message.text in (await taxi_fares.select_all_taxi_fare_name()):
-        data = await state.get_data()
-        distance, duration = await openroute_api.get_distance_and_duration(
-            point_a=[data['departure_longitude'], data['departure_latitude']],
-            point_b=[data['destination_longitude'], data['destination_latitude']]
+@dp.callback_query_handler(Text(startswith="destination="), state=OrderTaxi.Destination)
+async def taxi_set_departure(callback: types.CallbackQuery, state: FSMContext):
+    await callback.message.delete()
+    coordinates = callback.data.split("=")[1]
+    longitude = coordinates.split(",")[0]
+    latitude = coordinates.split(",")[1]
+    async with state.proxy() as data:
+        data['destination_longitude'] = longitude
+        data['destination_latitude'] = latitude
+    fares = await taxi_fares.select_all_taxi_fare_name()
+    fares_keyboard = types.InlineKeyboardMarkup()
+    for fare in fares:
+        fares_keyboard.add(
+            types.InlineKeyboardButton(
+                text=fare,
+                callback_data=f"fare={fare}"
+            )
         )
-        taxi_fare = await taxi_fares.select_fare_by_name(message.text)
-        price = taxi_fare_price(
-            distance=distance,
-            duration=duration,
-            min_price=taxi_fare.min_price,
-            min_distance=taxi_fare.min_distance,
-            min_duration=taxi_fare.min_duration,
-            km_price=taxi_fare.km_price,
-            minute_price=taxi_fare.minute_price,
-        )
-        await message.answer(
-            f"Расстояние: {distance} км\n"
-            f"Примерное время в пути: {duration} минут\n"
-            f"Тариф: {taxi_fare.name}\n"
-            f"Цена поездки: {price} рублей",
-            reply_markup=types.ReplyKeyboardRemove()
-        )
-        await state.finish()
-    else:
-        fares = await taxi_fares.select_all_taxi_fare_name()
-        keyboard = make_keyboard_list(fares)
-        keyboard.one_time_keyboard = True
-        return await message.reply("Выберите тариф из предложенных:", reply_markup=keyboard)
+    await callback.message.answer("Выберите тариф:", reply_markup=fares_keyboard)
+    await OrderTaxi.Fare.set()
+
+
+@dp.callback_query_handler(Text(startswith="fare="), state=OrderTaxi.Fare)
+async def taxi_set_fare(callback: types.CallbackQuery, state: FSMContext):
+    fare = callback.data.split("=")[1]
+    data = await state.get_data()
+    distance, duration = await openroute_api.get_distance_and_duration(
+        departure=[data['departure_longitude'], data['departure_latitude']],
+        destination=[data['destination_longitude'], data['destination_latitude']],
+    )
+    taxi_fare = await taxi_fares.select_fare_by_name(fare)
+    price = taxi_fare_price(
+        distance=distance,
+        duration=duration,
+        min_price=taxi_fare.min_price,
+        min_distance=taxi_fare.min_distance,
+        min_duration=taxi_fare.min_duration,
+        km_price=taxi_fare.km_price,
+        minute_price=taxi_fare.minute_price,
+    )
+    await callback.message.delete()
+    await callback.message.answer(
+        f"Расстояние: {distance} км\n"
+        f"Примерное время в пути: {duration} минут\n"
+        f"Тариф: {taxi_fare.name}\n"
+        f"Цена поездки: {price} рублей",
+        reply_markup=types.ReplyKeyboardRemove()
+    )
+    await state.finish()
