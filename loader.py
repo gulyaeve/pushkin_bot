@@ -6,6 +6,7 @@ from aiogram.contrib.fsm_storage.redis import RedisStorage2
 
 from config import Config
 from utils.db_api.db import Database
+from utils.db_api.taxi_fares import TaxiFaresDB
 from utils.db_api.usersdb import UsersDB
 from utils.db_api.messages import Messages
 from utils.admin_page_rest_api import AdminPageRestAPI
@@ -48,6 +49,7 @@ else:
     admin_api = None
 
 openroute_api = OpenrouteApi()
+taxi_fares = TaxiFaresDB()
 
 # Logging setup
 logging.basicConfig(

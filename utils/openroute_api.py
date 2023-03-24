@@ -16,10 +16,13 @@ class OpenrouteApi(RestAPI):
             "Content-Type": "application/json",
         }
 
-    async def get_distance_and_duration(self, point_a: list, point_b: list) -> [str]:
+    async def get_distance_and_duration(self, point_a: list, point_b: list) -> [int]:
         answer = await self.post_json("", {"coordinates": [point_a, point_b]})
-        # print(answer['routes'][0]['summary']['distance'], answer['routes'][0]['summary']['duration'])
-        return answer['routes'][0]['summary']['distance'], answer['routes'][0]['summary']['duration']
+        distance = int(answer['routes'][0]['summary']['distance'])
+        duration = int(answer['routes'][0]['summary']['duration'])
+        distance = round(distance / 1000)
+        duration = round(duration / 60)
+        return distance, duration
 
 
 # loop = asyncio.get_event_loop()

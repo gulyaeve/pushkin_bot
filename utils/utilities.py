@@ -40,3 +40,26 @@ def make_dict_output(d: types.User) -> str:
     for key, value in d.items():
         result += "{0}: {1}\n".format(key, value)
     return result
+
+
+def taxi_fare_price(
+        distance,
+        duration,
+        min_price,
+        min_distance,
+        min_duration,
+        km_price,
+        minute_price,
+):
+    price = min_price
+    extra_km = 0
+    if distance > min_distance:
+        extra_km = distance - min_distance
+    extra_minutes = 0
+    if duration > min_duration:
+        extra_minutes = duration - min_duration
+    price += extra_km * km_price
+    price += extra_minutes * minute_price
+    if price < min_price:
+        price = min_price
+    return price

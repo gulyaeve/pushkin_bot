@@ -16,6 +16,6 @@ class AdminPageRestAPI(RestAPI):
             "bot_data": self._bot_data,
         }
         data.update(update.to_python())
-        answer = await self._post_json('updates/create/', data)
+        answer = await self.post_json('updates/create/', data)
         logging.info(f"{answer=}")
 
