@@ -61,7 +61,8 @@ async def taxi_set_fare(message: types.Message, state: FSMContext):
         await message.answer(
             f"distance: {distance} km\n"
             f"duration: {duration} minutes\n"
-            f"price: {price} roubles"
+            f"price: {price} roubles",
+            reply_markup=types.ReplyKeyboardRemove()
         )
         await state.finish()
     else:
