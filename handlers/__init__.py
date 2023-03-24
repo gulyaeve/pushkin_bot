@@ -1,6 +1,7 @@
 from .main import dp
 from .admins import dp
 from .auth import dp
+from .taxi import dp
 
 from .any_text import dp
 
