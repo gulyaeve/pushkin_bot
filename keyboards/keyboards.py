@@ -42,3 +42,12 @@ request_submit = ReplyKeyboardMarkup(
     resize_keyboard=True
     )
 
+location_button = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="📍Текущая геолокация", request_location=True)
+        ],
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True,
+)

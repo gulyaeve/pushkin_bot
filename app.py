@@ -5,6 +5,7 @@ from aiogram import executor
 
 from utils.commands import set_default_commands
 from utils.messages.create_messages import create_messages
+from utils.taxi_fares.create_taxi_fares import create_taxi_fares
 from utils.users.create_user_types import create_user_types
 
 
@@ -19,6 +20,7 @@ async def on_startup(dp):
     await set_default_commands()
     await create_user_types()
     await create_messages()
+    await create_taxi_fares()
     await notify_admins(f"Бот запущен и готов к работе.\n\n<code>{(await dp.bot.get_me()).to_python()}</code>")
 
 

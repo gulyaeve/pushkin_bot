@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Эконом",
+    "min_price": 150,
+    "km_price": 20,
+    "minute_price": 20,
+    "min_distance": 3,
+    "min_duration": 10
+  },
+  {
+    "name": "Комфорт",
+    "min_price": 200,
+    "km_price": 25,
+    "minute_price": 25,
+    "min_distance": 3,
+    "min_duration": 10
+  }
+]

@@ -1,8 +1,8 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import StatesGroup, State
 
+from keyboards.keyboards import location_button
 from loader import dp, openroute_api, taxi_fares
 from utils.utilities import taxi_fare_price, make_keyboard_list
 
@@ -15,7 +15,7 @@ class OrderTaxi(StatesGroup):
 
 @dp.message_handler(commands=['taxi'])
 async def taxi_start_order(message: types.Message):
-    await message.answer("Укажите адрес отправления (геолокация)")
+    await message.answer("Укажите адрес отправления:", reply_markup=location_button)
     await OrderTaxi.Departure.set()
 
 
@@ -24,7 +24,7 @@ async def taxi_set_departure(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['departure_longitude'] = message.location.longitude
         data['departure_latitude'] = message.location.latitude
-    await message.answer("Укажите адрес назначения (геолокация)")
+    await message.answer("Укажите адрес назначения:")
     await OrderTaxi.Destination.set()
 
 
@@ -59,9 +59,10 @@ async def taxi_set_fare(message: types.Message, state: FSMContext):
             minute_price=taxi_fare.minute_price,
         )
         await message.answer(
-            f"distance: {distance} km\n"
-            f"duration: {duration} minutes\n"
-            f"price: {price} roubles",
+            f"Расстояние: {distance} км\n"
+            f"Примерное время в пути: {duration} минут\n"
+            f"Тариф: {taxi_fare.name}\n"
+            f"Цена поездки: {price} рублей",
             reply_markup=types.ReplyKeyboardRemove()
         )
         await state.finish()

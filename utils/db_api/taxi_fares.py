@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from dataclasses import dataclass
 
 import asyncpg
@@ -57,3 +58,21 @@ class TaxiFaresDB(Database):
         sql = "SELECT * FROM taxi_fares WHERE name=$1"
         record = await self._execute(sql, name, fetchrow=True)
         return await self._format_fare(record)
+
+    async def add_fare(
+            self,
+            name: str,
+            min_price: int,
+            km_price: int,
+            minute_price: int,
+            min_distance: int,
+            min_duration: int) -> TaxiFare:
+        fare = await self._execute("SELECT * FROM taxi_fares WHERE name=$1", name, fetchrow=True)
+        if fare is None:
+            sql = "INSERT INTO taxi_fares (name, min_price, km_price, minute_price, min_distance, min_duration) " \
+                  "VALUES($1, $2, $3, $4, $5, $6) returning *"
+            record = await self._execute(
+                sql, name, min_price, km_price, minute_price, min_distance, min_duration, fetchrow=True
+            )
+            logging.info(f"Fare {name} success save in db")
+            return await self._format_fare(record)

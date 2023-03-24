@@ -1,8 +1,6 @@
 import json
 from logging import log, INFO
 
-from asyncpg import UniqueViolationError
-
 from loader import users
 
 
