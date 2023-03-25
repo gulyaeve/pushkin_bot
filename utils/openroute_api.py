@@ -58,6 +58,11 @@ class OpenrouteApi(RestAPI):
         params = {
             "api_key": self._token,
             "text": address,
+            "boundary.circle.lat": 55.753927,
+            "boundary.circle.lon": 37.621820,
+            "boundary.circle.radius": 60,
+            "boundary.country": "RUS",
+            "size": 5,
         }
         answer = await self.get_json("/geocode/search", params)
         list_of_addresses = []
@@ -65,7 +70,7 @@ class OpenrouteApi(RestAPI):
             for feature in answer['features']:
                 longitude = feature['geometry']['coordinates'][0]
                 latitude = feature['geometry']['coordinates'][1]
-                label = feature['properties']['label']
+                label = feature['properties']['name']
                 list_of_addresses.append(AddressData(label, [longitude, latitude]))
         return list_of_addresses
 
