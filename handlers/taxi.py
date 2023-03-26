@@ -4,7 +4,7 @@ from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import StatesGroup, State
 
 from keyboards.keyboards import location_button
-from loader import dp, openroute_api, taxi_fares
+from loader import dp, openroute_api, taxi_fares, messages
 from utils.utilities import taxi_fare_price
 
 
@@ -16,7 +16,7 @@ class OrderTaxi(StatesGroup):
 
 @dp.message_handler(commands=['taxi'])
 async def taxi_start_order(message: types.Message):
-    await message.answer("Укажите адрес отправления:", reply_markup=location_button)
+    await message.answer(await messages.get_message("taxi_departure"), reply_markup=location_button)
     await OrderTaxi.Departure.set()
 
 
@@ -25,7 +25,7 @@ async def taxi_set_departure(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['departure_longitude'] = message.location.longitude
         data['departure_latitude'] = message.location.latitude
-    await message.answer("Укажите адрес назначения:", reply_markup=types.ReplyKeyboardRemove())
+    await message.answer(await messages.get_message("taxi_destination"), reply_markup=types.ReplyKeyboardRemove())
     await OrderTaxi.Destination.set()
 
 
@@ -41,9 +41,9 @@ async def taxi_set_departure(message: types.Message, state: FSMContext):
                     callback_data=f"departure={address.coordinates[0]},{address.coordinates[1]}"
                 )
             )
-        await message.answer("Выберите искомый адрес:", reply_markup=address_keyboard)
+        await message.answer(await messages.get_message("taxi_select_address"), reply_markup=address_keyboard)
     else:
-        return await message.answer("Адрес не найден")
+        return await message.answer(await messages.get_message("taxi_wrong_address"))
 
 
 @dp.callback_query_handler(Text(startswith="departure="), state=OrderTaxi.Departure)
@@ -55,7 +55,7 @@ async def taxi_set_departure(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data['departure_longitude'] = longitude
         data['departure_latitude'] = latitude
-    await callback.message.answer("Укажите адрес назначения:", reply_markup=types.ReplyKeyboardRemove())
+    await callback.message.answer(await messages.get_message("taxi_destination"), reply_markup=types.ReplyKeyboardRemove())
     await OrderTaxi.Destination.set()
 
 
@@ -73,7 +73,7 @@ async def taxi_set_destination(message: types.Message, state: FSMContext):
                 callback_data=f"fare={fare}"
             )
         )
-    await message.answer("Выберите тариф:", reply_markup=fares_keyboard)
+    await message.answer(await messages.get_message("taxi_select_fare"), reply_markup=fares_keyboard)
     await OrderTaxi.Fare.set()
 
 
@@ -89,9 +89,9 @@ async def taxi_set_destination(message: types.Message, state: FSMContext):
                     callback_data=f"destination={address.coordinates[0]},{address.coordinates[1]}"
                 )
             )
-        await message.answer("Выберите искомый адрес:", reply_markup=address_keyboard)
+        await message.answer(await messages.get_message("taxi_select_address"), reply_markup=address_keyboard)
     else:
-        return await message.answer("Адрес не найден")
+        return await message.answer(await messages.get_message("taxi_wrong_address"))
 
 
 @dp.callback_query_handler(Text(startswith="destination="), state=OrderTaxi.Destination)
@@ -112,7 +112,7 @@ async def taxi_set_departure(callback: types.CallbackQuery, state: FSMContext):
                 callback_data=f"fare={fare}"
             )
         )
-    await callback.message.answer("Выберите тариф:", reply_markup=fares_keyboard)
+    await callback.message.answer(await messages.get_message("taxi_select_fare"), reply_markup=fares_keyboard)
     await OrderTaxi.Fare.set()
 
 

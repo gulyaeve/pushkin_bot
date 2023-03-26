@@ -2,6 +2,7 @@
   "type_users": [
     "user",
     "manager",
-    "admin"
+    "admin",
+    "driver"
   ]
 }
