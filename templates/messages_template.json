@@ -16,5 +16,6 @@
   "taxi_destination": "Укажите адрес назначения:",
   "taxi_select_address": "Выберите искомый адрес:",
   "taxi_wrong_address": "Адрес не найден",
-  "taxi_select_fare": "Выберите тариф:"
+  "taxi_select_fare": "Выберите тариф:",
+  "driver_reg_prompt": "Необходимо пройти регистрацию"
 }
