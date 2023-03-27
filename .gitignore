@@ -124,3 +124,5 @@ dmypy.json
 /postgres/
 /redis_data/
 !/.env.dist
+
+media_dev

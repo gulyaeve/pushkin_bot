@@ -46,6 +46,8 @@ class Config:
     REDIS_HOST = env.str("REDIS_HOST")
     REDIS_PORT = env.int("REDIS_PORT")
 
+    MEDIA = env.str("MEDIA")
+
     # Proxy
     proxy_url = ""
     try:
