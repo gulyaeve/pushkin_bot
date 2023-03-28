@@ -151,7 +151,7 @@ async def driver_passport_photo_menu(callback: types.CallbackQuery):
 async def driver_input_passport_photo(message: types.Message, state: FSMContext):
     passport_path = f"passports/{message.from_user.id}.png"
     passport_destination = f"{Config.MEDIA}/{passport_path}"
-    await message.photo[-1].download(passport_destination)
+    await message.photo[-1].download(destination_file=passport_destination)
 
     driver = await drivers.update_driver_info(message.from_user.id, passport_photo=passport_path)
     menu = make_driver_reg_menu(
@@ -163,3 +163,8 @@ async def driver_input_passport_photo(message: types.Message, state: FSMContext)
     await message.answer(await messages.get_message("driver_correct_input"))
     await message.answer(await messages.get_message("driver_reg_menu"), reply_markup=menu)
     await state.finish()
+
+
+@dp.message_handler(state=DriverStates.PassportPhoto, content_types=types.ContentType.ANY)
+async def driver_input_passport_photo(message: types.Message):
+    return await message.answer(await messages.get_message("driver_wrong_photo"))

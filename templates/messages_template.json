@@ -20,6 +20,7 @@
   "driver_reg_prompt": "Необходимо пройти регистрацию",
   "driver_reg_menu": "Меню регистрации:",
   "driver_wrong_input": "Введите текстом пожалуйста",
+  "driver_wrong_photo": "Отправьте фото пожалуйста",
   "driver_correct_input": "Данные успешно сохранены",
   "driver_input_fio": "Введите ФИО:",
   "driver_input_passport": "Введите паспортные данные:",
