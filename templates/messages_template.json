@@ -27,5 +27,7 @@
   "driver_input_phone": "Введите номер телефона или поделитесь через кнопку:",
   "driver_input_passport_photo": "Отправьте фото паспорта:",
   "driver_info_validate_true": "Анкета отправлена на проверку",
-  "driver_info_validate_false": "Укажите все данные"
+  "driver_info_validate_false": "Укажите все данные",
+  "driver_manager_decline": "Менеджер отклонил вашу заявку на регистрацию в качестве водителя.",
+  "driver_manager_accept": "Ваша заявка на регистрацию в качестве водителя одобрена! /driver"
 }

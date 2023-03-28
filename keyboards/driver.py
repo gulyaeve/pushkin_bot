@@ -9,6 +9,8 @@ class DriverCallbacks:
     driver_passport_photo = "driver_passport_photo"
     driver_back = "driver_back"
     driver_ready = "driver_ready"
+    driver_manager_decline = "driver_manager_decline"
+    driver_manager_agree = "driver_manager_agree"
 
 
 reg_button = InlineKeyboardMarkup(
@@ -21,6 +23,25 @@ reg_button = InlineKeyboardMarkup(
         ]
     ]
 )
+
+
+def make_manager_view(driver_id: int) -> InlineKeyboardMarkup:
+    manager_view = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="❌",
+                    callback_data=f"{DriverCallbacks.driver_manager_decline}={driver_id}",
+                ),
+                InlineKeyboardButton(
+                    text="✅",
+                    callback_data=f"{DriverCallbacks.driver_manager_agree}={driver_id}",
+                ),
+
+            ]
+        ]
+    )
+    return manager_view
 
 
 def make_driver_reg_menu(fio: bool = False, phone: bool = False, passport: bool = False, passport_photo: bool = False):

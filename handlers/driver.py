@@ -1,12 +1,14 @@
+import logging
+
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
 
 from config import Config
 from filters import DriverCheck
-from keyboards.driver import reg_button, make_driver_reg_menu, DriverCallbacks
+from keyboards.driver import reg_button, make_driver_reg_menu, DriverCallbacks, make_manager_view
 from keyboards.keyboards import auth_phone
-from loader import dp, messages, drivers
+from loader import dp, messages, drivers, users
 
 
 class DriverStates(StatesGroup):
@@ -174,7 +176,25 @@ async def driver_input_passport_photo(message: types.Message):
 async def driver_ready_menu(callback: types.CallbackQuery):
     driver = await drivers.get_driver_info(callback.from_user.id)
     if driver.validate_info():
+        manager_user_type = await users.select_user_type("manager")
+        managers = await users.select_users_by_type(manager_user_type)
+        for manager in managers:
+            await dp.bot.send_photo(
+                chat_id=manager.telegram_id,
+                photo=types.InputFile(f"{Config.MEDIA}/{driver.passport_photo}"),
+                caption=f"<b>Новая анкета:</b>\n{str(driver)}",
+                reply_markup=make_manager_view(driver.telegram_id),
+            )
+        logging.info(f"Новая анкета водителя {driver.telegram_id}")
         await callback.answer(await messages.get_message("driver_info_validate_true"), show_alert=True)
-    #     TODO: ОТПРАВКА на проверку
     else:
-        await callback.answer(await messages.get_message("driver_info_validate_false"), show_alert=True)
+        answer = "Необходимо заполнить:\n"
+        if driver.fio == "":
+            answer += "ФИО\n"
+        if driver.phone == "":
+            answer += "Номер телефона\n"
+        if driver.passport == "":
+            answer += "Паспортные данные\n"
+        if driver.passport_photo == "":
+            answer += "Фото паспорта\n"
+        await callback.answer(answer, show_alert=True)

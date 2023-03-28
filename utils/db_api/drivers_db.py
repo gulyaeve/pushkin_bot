@@ -20,6 +20,12 @@ class Driver:
         else:
             return False
 
+    def __str__(self):
+        msg = f"ФИО: {self.fio}\n" \
+              f"Телефон: {self.phone}\n" \
+              f"Паспорт: {self.passport}\n"
+        return msg
+
 
 class DriversDB(Database):
     def __init__(self):
@@ -70,6 +76,9 @@ class DriversDB(Database):
             sql = f"UPDATE drivers SET {name}=$2 WHERE telegram_id=$1"
             await self._execute(sql, telegram_id, value, execute=True)
         return await self._format_driver(await self._select_driver(telegram_id))
+
+    async def remove_driver(self, telegram_id: int):
+        await self._execute("DELETE FROM drivers WHERE telegram_id=$1", telegram_id, execute=True)
 
 
 # loop = asyncio.get_event_loop()
