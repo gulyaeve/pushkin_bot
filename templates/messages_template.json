@@ -18,5 +18,10 @@
   "taxi_wrong_address": "Адрес не найден",
   "taxi_select_fare": "Выберите тариф:",
   "driver_reg_prompt": "Необходимо пройти регистрацию",
-  "driver_reg_menu": "Меню регистрации:"
+  "driver_reg_menu": "Меню регистрации:",
+  "driver_wrong_input": "Введите текстом пожалуйста",
+  "driver_correct_input": "Данные успешно сохранены",
+  "driver_input_fio": "Введите ФИО:",
+  "driver_input_passport": "Введите паспортные данные:",
+  "driver_input_phone": "Введите номер телефона или поделитесь через кнопку:"
 }

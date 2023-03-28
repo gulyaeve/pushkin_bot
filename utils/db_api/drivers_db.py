@@ -43,10 +43,9 @@ class DriversDB(Database):
             passport_photo=record['passport_photo'],
         )
 
-    async def select_driver(self, telegram_id: int) -> Driver:
+    async def select_driver(self, telegram_id: int) -> asyncpg.Record:
         sql = "SELECT * FROM drivers WHERE telegram_id=$1"
-        record = await self._execute(sql, telegram_id, fetchrow=True)
-        return record
+        return await self._execute(sql, telegram_id, fetchrow=True)
 
     async def add_driver(self, telegram_id: int) -> Driver:
         exist_driver = await self.select_driver(telegram_id)
@@ -56,3 +55,14 @@ class DriversDB(Database):
             sql = "INSERT INTO drivers (telegram_id) VALUES($1) returning *"
             record = await self._execute(sql, telegram_id, fetchrow=True)
             return await self._format_driver(record)
+
+    async def update_driver_info(self, telegram_id: int, **kwargs):
+        for name, value in kwargs.items():
+            sql = f"UPDATE drivers SET {name}=$2 WHERE telegram_id=$1"
+            await self._execute(sql, telegram_id, value, execute=True)
+        return await self._format_driver(await self.select_driver(telegram_id))
+
+
+# loop = asyncio.get_event_loop()
+# test_drive = DriversDB()
+# loop.run_until_complete(test_drive.update_driver_info(telegram_id=253122, fio="1", phone="2"))
