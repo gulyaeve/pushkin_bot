@@ -168,3 +168,13 @@ async def driver_input_passport_photo(message: types.Message, state: FSMContext)
 @dp.message_handler(state=DriverStates.PassportPhoto, content_types=types.ContentType.ANY)
 async def driver_input_passport_photo(message: types.Message):
     return await message.answer(await messages.get_message("driver_wrong_photo"))
+
+
+@dp.callback_query_handler(text=DriverCallbacks.driver_ready)
+async def driver_ready_menu(callback: types.CallbackQuery):
+    driver = await drivers.get_driver_info(callback.from_user.id)
+    if driver.validate_info():
+        await callback.answer(await messages.get_message("driver_info_validate_true"), show_alert=True)
+    #     TODO: ОТПРАВКА на проверку
+    else:
+        await callback.answer(await messages.get_message("driver_info_validate_false"), show_alert=True)

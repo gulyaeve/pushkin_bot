@@ -14,6 +14,12 @@ class Driver:
     passport: str
     passport_photo: str
 
+    def validate_info(self) -> bool:
+        if self.fio != "" and self.phone != "" and self.passport != "" and self.passport_photo != "":
+            return True
+        else:
+            return False
+
 
 class DriversDB(Database):
     def __init__(self):
@@ -43,12 +49,15 @@ class DriversDB(Database):
             passport_photo=record['passport_photo'],
         )
 
-    async def select_driver(self, telegram_id: int) -> asyncpg.Record:
+    async def _select_driver(self, telegram_id: int) -> asyncpg.Record:
         sql = "SELECT * FROM drivers WHERE telegram_id=$1"
         return await self._execute(sql, telegram_id, fetchrow=True)
 
+    async def get_driver_info(self, telegram_id: int) -> Driver:
+        return await self._format_driver(await self._select_driver(telegram_id))
+
     async def add_driver(self, telegram_id: int) -> Driver:
-        exist_driver = await self.select_driver(telegram_id)
+        exist_driver = await self._select_driver(telegram_id)
         if exist_driver is not None:
             return await self._format_driver(exist_driver)
         else:
@@ -60,7 +69,7 @@ class DriversDB(Database):
         for name, value in kwargs.items():
             sql = f"UPDATE drivers SET {name}=$2 WHERE telegram_id=$1"
             await self._execute(sql, telegram_id, value, execute=True)
-        return await self._format_driver(await self.select_driver(telegram_id))
+        return await self._format_driver(await self._select_driver(telegram_id))
 
 
 # loop = asyncio.get_event_loop()
