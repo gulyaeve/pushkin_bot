@@ -2,6 +2,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
 
+from config import Config
 from filters import DriverCheck
 from keyboards.driver import reg_button, make_driver_reg_menu, DriverCallbacks
 from keyboards.keyboards import auth_phone
@@ -138,3 +139,27 @@ async def driver_input_passport(message: types.Message, state: FSMContext):
         await state.finish()
     else:
         return await message.answer(await messages.get_message("driver_wrong_input"))
+
+
+@dp.callback_query_handler(text=DriverCallbacks.driver_passport_photo)
+async def driver_passport_photo_menu(callback: types.CallbackQuery):
+    await callback.message.edit_text(await messages.get_message("driver_input_passport_photo"))
+    await DriverStates.PassportPhoto.set()
+
+
+@dp.message_handler(state=DriverStates.PassportPhoto, content_types=types.ContentType.PHOTO)
+async def driver_input_passport_photo(message: types.Message, state: FSMContext):
+    passport_path = f"passports/{message.from_user.id}.png"
+    passport_destination = f"{Config.MEDIA}/{passport_path}"
+    await message.photo[-1].download(passport_destination)
+
+    driver = await drivers.update_driver_info(message.from_user.id, passport_photo=passport_path)
+    menu = make_driver_reg_menu(
+        fio=True if driver.fio else False,
+        phone=True if driver.phone else False,
+        passport=True if driver.passport else False,
+        passport_photo=True if driver.passport_photo else False,
+    )
+    await message.answer(await messages.get_message("driver_correct_input"))
+    await message.answer(await messages.get_message("driver_reg_menu"), reply_markup=menu)
+    await state.finish()
