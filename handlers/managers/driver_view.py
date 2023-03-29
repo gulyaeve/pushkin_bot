@@ -8,6 +8,7 @@ from keyboards.driver import DriverCallbacks
 from loader import dp, drivers, messages, users
 
 
+# @dp.callback_query_handler(Text(startswith=DriverCallbacks.driver_manager_decline), ManagerCheck())
 @dp.callback_query_handler(Text(startswith=DriverCallbacks.driver_manager_decline), ManagerCheck())
 async def manager_driver_decline(callback: types.CallbackQuery):
     driver_id = int(callback.data.split("=")[1])
@@ -19,6 +20,7 @@ async def manager_driver_decline(callback: types.CallbackQuery):
     )
     logging.info(f"Водитель {driver_id} отклонен менеджером {callback.from_user.id}")
     await callback.answer(f"Вы отклонили водителя {driver.fio}", show_alert=True)
+    await callback.message.delete()
 
 
 @dp.callback_query_handler(Text(startswith=DriverCallbacks.driver_manager_agree), ManagerCheck())
@@ -33,3 +35,4 @@ async def manager_driver_accept(callback: types.CallbackQuery):
     )
     logging.info(f"Водитель {driver_id} назначен менеджером {callback.from_user.id}")
     await callback.answer(f"Вы назначили водителя {driver.fio}", show_alert=True)
+    await callback.message.delete()

@@ -20,7 +20,15 @@ class DriverStates(StatesGroup):
 
 @dp.message_handler(DriverCheck(), commands=['driver'])
 async def driver_start(message: types.Message):
-    await message.answer("Вы водитель")
+    await message.answer(await messages.get_message("driver_menu"))
+
+
+@dp.callback_query_handler(DriverCheck(), state=DriverStates.all_states)
+@dp.callback_query_handler(DriverCheck(), text=[DriverCallbacks.driver_back, DriverCallbacks.driver_reg_menu])
+# @dp.callback_query_handler(DriverCheck(), text=DriverCallbacks.driver_reg_menu)
+async def driver_menu(callback: types.CallbackQuery, state: FSMContext):
+    await state.finish()
+    await callback.message.edit_text(await messages.get_message("driver_menu"))
 
 
 @dp.message_handler(commands=['driver'])
@@ -187,6 +195,7 @@ async def driver_ready_menu(callback: types.CallbackQuery):
             )
         logging.info(f"Новая анкета водителя {driver.telegram_id}")
         await callback.answer(await messages.get_message("driver_info_validate_true"), show_alert=True)
+        await callback.message.delete()
     else:
         answer = "Необходимо заполнить:\n"
         if driver.fio == "":
