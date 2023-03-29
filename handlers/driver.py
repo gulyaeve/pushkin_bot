@@ -25,7 +25,6 @@ async def driver_start(message: types.Message):
 
 @dp.callback_query_handler(DriverCheck(), state=DriverStates.all_states)
 @dp.callback_query_handler(DriverCheck(), text=[DriverCallbacks.driver_back, DriverCallbacks.driver_reg_menu])
-# @dp.callback_query_handler(DriverCheck(), text=DriverCallbacks.driver_reg_menu)
 async def driver_menu(callback: types.CallbackQuery, state: FSMContext):
     await state.finish()
     await callback.message.edit_text(await messages.get_message("driver_menu"))
