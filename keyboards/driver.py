@@ -11,6 +11,8 @@ class DriverCallbacks:
     driver_ready = "driver_ready"
     driver_manager_decline = "driver_manager_decline"
     driver_manager_agree = "driver_manager_agree"
+    driver_help = "driver_help"
+    driver_fare = "driver_fare"
 
 
 reg_button = InlineKeyboardMarkup(
@@ -86,3 +88,21 @@ def make_driver_reg_menu(fio: bool = False, phone: bool = False, passport: bool 
         row_width=1,
     )
     return reg_menu
+
+
+driver_menu = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(
+                text="Полезное",
+                callback_data=DriverCallbacks.driver_help,
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text="Настройки тарифа",
+                callback_data=DriverCallbacks.driver_fare,
+            )
+        ]
+    ]
+)

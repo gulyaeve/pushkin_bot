@@ -6,7 +6,7 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 
 from config import Config
 from filters import DriverCheck
-from keyboards.driver import reg_button, make_driver_reg_menu, DriverCallbacks, make_manager_view
+from keyboards.driver import reg_button, make_driver_reg_menu, DriverCallbacks, make_manager_view, driver_menu
 from keyboards.keyboards import auth_phone
 from loader import dp, messages, drivers, users
 
@@ -20,14 +20,14 @@ class DriverStates(StatesGroup):
 
 @dp.message_handler(DriverCheck(), commands=['driver'])
 async def driver_start(message: types.Message):
-    await message.answer(await messages.get_message("driver_menu"))
+    await message.answer(await messages.get_message("driver_menu"), reply_markup=driver_menu)
 
 
 @dp.callback_query_handler(DriverCheck(), state=DriverStates.all_states)
 @dp.callback_query_handler(DriverCheck(), text=[DriverCallbacks.driver_back, DriverCallbacks.driver_reg_menu])
-async def driver_menu(callback: types.CallbackQuery, state: FSMContext):
+async def driver_start(callback: types.CallbackQuery, state: FSMContext):
     await state.finish()
-    await callback.message.edit_text(await messages.get_message("driver_menu"))
+    await callback.message.edit_text(await messages.get_message("driver_menu"), reply_markup=driver_menu)
 
 
 @dp.message_handler(commands=['driver'])
