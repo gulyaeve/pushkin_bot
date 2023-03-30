@@ -32,6 +32,7 @@ services:
       - ".env.dev"
     volumes:
       - .:/src
+      - ./media:/src/media
     networks:
       - default
 #    depends_on:
