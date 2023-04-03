@@ -7,6 +7,8 @@ class DriverCallbacks:
     driver_phone = "driver_phone"
     driver_passport = "driver_passport"
     driver_passport_photo = "driver_passport_photo"
+    driver_sts_1 = "driver_sts_1"
+    driver_sts_2 = "driver_sts_2"
     driver_back = "driver_back"
     driver_ready = "driver_ready"
     driver_manager_decline = "driver_manager_decline"
@@ -46,7 +48,13 @@ def make_manager_view(driver_id: int) -> InlineKeyboardMarkup:
     return manager_view
 
 
-def make_driver_reg_menu(fio: bool = False, phone: bool = False, passport: bool = False, passport_photo: bool = False):
+def make_driver_reg_menu(
+        fio: bool = False,
+        phone: bool = False,
+        passport: bool = False,
+        passport_photo: bool = False,
+        sts_photo_1: bool = False,
+        sts_photo_2: bool = False):
     reg_menu = InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -71,6 +79,18 @@ def make_driver_reg_menu(fio: bool = False, phone: bool = False, passport: bool 
                 InlineKeyboardButton(
                     text="Фото паспорта" if not passport_photo else "Фото паспорта ✅",
                     callback_data=DriverCallbacks.driver_passport_photo,
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="Фото СТС лицевая сторона" if not sts_photo_1 else "Фото СТС лицевая сторона ✅",
+                    callback_data=DriverCallbacks.driver_sts_1,
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="Фото СТС оборотная сторона" if not sts_photo_2 else "Фото СТС оборотная сторона ✅",
+                    callback_data=DriverCallbacks.driver_sts_2,
                 )
             ],
             [

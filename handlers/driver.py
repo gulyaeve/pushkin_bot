@@ -16,6 +16,8 @@ class DriverStates(StatesGroup):
     Phone = State()
     Passport = State()
     PassportPhoto = State()
+    STSPhoto1 = State()
+    STSPhoto2 = State()
 
 
 @dp.message_handler(DriverCheck(), commands=['driver'])
@@ -48,6 +50,8 @@ async def driver_reg_menu(callback: types.CallbackQuery):
         phone=True if driver.phone else False,
         passport=True if driver.passport else False,
         passport_photo=True if driver.passport_photo else False,
+        sts_photo_1=True if driver.sts_photo_1 else False,
+        sts_photo_2=True if driver.sts_photo_2 else False,
     )
     await callback.message.edit_text(await messages.get_message("driver_reg_menu"), reply_markup=menu)
 
@@ -67,6 +71,8 @@ async def driver_input_fio(message: types.Message, state: FSMContext):
             phone=True if driver.phone else False,
             passport=True if driver.passport else False,
             passport_photo=True if driver.passport_photo else False,
+            sts_photo_1=True if driver.sts_photo_1 else False,
+            sts_photo_2=True if driver.sts_photo_2 else False,
         )
         await message.answer(await messages.get_message("driver_correct_input"))
         await message.answer(await messages.get_message("driver_reg_menu"), reply_markup=menu)
@@ -92,6 +98,8 @@ async def driver_input_phone(message: types.Message, state: FSMContext):
             phone=True if driver.phone else False,
             passport=True if driver.passport else False,
             passport_photo=True if driver.passport_photo else False,
+            sts_photo_1=True if driver.sts_photo_1 else False,
+            sts_photo_2=True if driver.sts_photo_2 else False,
         )
         await message.answer(
             await messages.get_message("driver_correct_input"),
@@ -114,6 +122,8 @@ async def driver_input_phone(message: types.Message, state: FSMContext):
                 phone=True if driver.phone else False,
                 passport=True if driver.passport else False,
                 passport_photo=True if driver.passport_photo else False,
+                sts_photo_1=True if driver.sts_photo_1 else False,
+                sts_photo_2=True if driver.sts_photo_2 else False,
             )
             await message.answer(
                 await messages.get_message("driver_correct_input"),
@@ -142,6 +152,8 @@ async def driver_input_passport(message: types.Message, state: FSMContext):
             phone=True if driver.phone else False,
             passport=True if driver.passport else False,
             passport_photo=True if driver.passport_photo else False,
+            sts_photo_1=True if driver.sts_photo_1 else False,
+            sts_photo_2=True if driver.sts_photo_2 else False,
         )
         await message.answer(await messages.get_message("driver_correct_input"))
         await message.answer(await messages.get_message("driver_reg_menu"), reply_markup=menu)
@@ -168,6 +180,8 @@ async def driver_input_passport_photo(message: types.Message, state: FSMContext)
         phone=True if driver.phone else False,
         passport=True if driver.passport else False,
         passport_photo=True if driver.passport_photo else False,
+        sts_photo_1=True if driver.sts_photo_1 else False,
+        sts_photo_2=True if driver.sts_photo_2 else False,
     )
     await message.answer(await messages.get_message("driver_correct_input"))
     await message.answer(await messages.get_message("driver_reg_menu"), reply_markup=menu)
@@ -179,6 +193,64 @@ async def driver_input_passport_photo(message: types.Message):
     return await message.answer(await messages.get_message("driver_wrong_photo"))
 
 
+@dp.callback_query_handler(text=DriverCallbacks.driver_sts_1)
+async def driver_passport_photo_menu(callback: types.CallbackQuery):
+    await callback.message.edit_text(await messages.get_message("driver_input_sts_photo_1"))
+    await DriverStates.STSPhoto1.set()
+
+
+@dp.callback_query_handler(text=DriverCallbacks.driver_sts_2)
+async def driver_passport_photo_menu(callback: types.CallbackQuery):
+    await callback.message.edit_text(await messages.get_message("driver_input_sts_photo_2"))
+    await DriverStates.STSPhoto2.set()
+
+
+@dp.message_handler(state=DriverStates.STSPhoto1, content_types=types.ContentType.PHOTO)
+async def driver_input_passport_photo(message: types.Message, state: FSMContext):
+    sts_path = f"sts1/{message.from_user.id}.png"
+    sts_destination = f"{Config.MEDIA}/{sts_path}"
+    await message.photo[-1].download(destination_file=sts_destination)
+
+    driver = await drivers.update_driver_info(message.from_user.id, sts_photo_1=sts_path)
+    menu = make_driver_reg_menu(
+        fio=True if driver.fio else False,
+        phone=True if driver.phone else False,
+        passport=True if driver.passport else False,
+        passport_photo=True if driver.passport_photo else False,
+        sts_photo_1=True if driver.sts_photo_1 else False,
+        sts_photo_2=True if driver.sts_photo_2 else False,
+    )
+    await message.answer(await messages.get_message("driver_correct_input"))
+    await message.answer(await messages.get_message("driver_reg_menu"), reply_markup=menu)
+    await state.finish()
+
+
+@dp.message_handler(state=DriverStates.STSPhoto2, content_types=types.ContentType.PHOTO)
+async def driver_input_passport_photo(message: types.Message, state: FSMContext):
+    sts_path = f"sts2/{message.from_user.id}.png"
+    sts_destination = f"{Config.MEDIA}/{sts_path}"
+    await message.photo[-1].download(destination_file=sts_destination)
+
+    driver = await drivers.update_driver_info(message.from_user.id, sts_photo_2=sts_path)
+    menu = make_driver_reg_menu(
+        fio=True if driver.fio else False,
+        phone=True if driver.phone else False,
+        passport=True if driver.passport else False,
+        passport_photo=True if driver.passport_photo else False,
+        sts_photo_1=True if driver.sts_photo_1 else False,
+        sts_photo_2=True if driver.sts_photo_2 else False,
+    )
+    await message.answer(await messages.get_message("driver_correct_input"))
+    await message.answer(await messages.get_message("driver_reg_menu"), reply_markup=menu)
+    await state.finish()
+
+
+@dp.message_handler(state=DriverStates.STSPhoto1, content_types=types.ContentType.ANY)
+@dp.message_handler(state=DriverStates.STSPhoto2, content_types=types.ContentType.ANY)
+async def driver_input_passport_photo(message: types.Message):
+    return await message.answer(await messages.get_message("driver_wrong_photo"))
+
+
 @dp.callback_query_handler(text=DriverCallbacks.driver_ready)
 async def driver_ready_menu(callback: types.CallbackQuery):
     driver = await drivers.get_driver_info(callback.from_user.id)
@@ -186,12 +258,22 @@ async def driver_ready_menu(callback: types.CallbackQuery):
         manager_user_type = await users.select_user_type("manager")
         managers = await users.select_users_by_type(manager_user_type)
         for manager in managers:
-            await dp.bot.send_photo(
+            await dp.bot.send_media_group(
                 chat_id=manager.telegram_id,
-                photo=types.InputFile(f"{Config.MEDIA}/{driver.passport_photo}"),
-                caption=f"<b>Новая анкета:</b>\n{str(driver)}",
-                reply_markup=make_manager_view(driver.telegram_id),
+                media=types.MediaGroup(
+                    [
+                        types.InputMedia(f"{Config.MEDIA}/{driver.passport_photo}"),
+                        types.InputMedia(f"{Config.MEDIA}/{driver.sts_photo_1}"),
+                        types.InputMedia(f"{Config.MEDIA}/{driver.sts_photo_2}"),
+                    ]
+                )
             )
+            # await dp.bot.send_photo(
+            #     chat_id=manager.telegram_id,
+            #     photo=types.InputFile(f"{Config.MEDIA}/{driver.passport_photo}"),
+            #     caption=f"<b>Новая анкета:</b>\n{str(driver)}",
+            #     reply_markup=make_manager_view(driver.telegram_id),
+            # )
         logging.info(f"Новая анкета водителя {driver.telegram_id}")
         await callback.answer(await messages.get_message("driver_info_validate_true"), show_alert=True)
         await callback.message.delete()
@@ -205,4 +287,8 @@ async def driver_ready_menu(callback: types.CallbackQuery):
             answer += "Паспортные данные\n"
         if driver.passport_photo == "":
             answer += "Фото паспорта\n"
+        if driver.sts_photo_1 == "":
+            answer += "Фото СТС (лицевая сторона)\n"
+        if driver.sts_photo_2 == "":
+            answer += "Фото СТС (оборотная сторона)\n"
         await callback.answer(answer, show_alert=True)

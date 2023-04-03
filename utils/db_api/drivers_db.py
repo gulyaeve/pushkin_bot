@@ -13,9 +13,16 @@ class Driver:
     phone: str
     passport: str
     passport_photo: str
+    sts_photo_1: str
+    sts_photo_2: str
 
     def validate_info(self) -> bool:
-        if self.fio != "" and self.phone != "" and self.passport != "" and self.passport_photo != "":
+        if self.fio != "" and \
+                self.phone != "" and \
+                self.passport != "" and \
+                self.passport_photo != "" and \
+                self.sts_photo_1 != "" and \
+                self.sts_photo_2 != "":
             return True
         else:
             return False
@@ -40,7 +47,9 @@ class DriversDB(Database):
             fio character varying(255) DEFAULT NULL,
             phone character varying(255) UNIQUE DEFAULT NULL,
             passport character varying(255) DEFAULT NULL,
-            passport_photo character varying(255) DEFAULT NULL
+            passport_photo character varying(255) DEFAULT NULL,
+            sts_photo_1 character varying(255) DEFAULT NULL,
+            sts_photo_2 character varying(255) DEFAULT NULL
         );
         """
         await self._execute(sql, execute=True)
@@ -53,6 +62,8 @@ class DriversDB(Database):
             fio=record['fio'],
             passport=record['passport'],
             passport_photo=record['passport_photo'],
+            sts_photo_1=record['sts_photo_1'],
+            sts_photo_2=record['sts_photo_2'],
         )
 
     async def _select_driver(self, telegram_id: int) -> asyncpg.Record:
