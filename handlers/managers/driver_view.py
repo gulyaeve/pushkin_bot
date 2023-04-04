@@ -3,13 +3,13 @@ import logging
 from aiogram import types
 from aiogram.dispatcher.filters import Text
 
-from filters import ManagerCheck
+from filters import ManagerCheck, AdminCheck
 from keyboards.driver import DriverCallbacks
 from loader import dp, drivers, messages, users
 
 
 # @dp.callback_query_handler(Text(startswith=DriverCallbacks.driver_manager_decline), ManagerCheck())
-@dp.callback_query_handler(Text(startswith=DriverCallbacks.driver_manager_decline), ManagerCheck())
+@dp.callback_query_handler(Text(startswith=DriverCallbacks.driver_manager_decline), ManagerCheck(), AdminCheck())
 async def manager_driver_decline(callback: types.CallbackQuery):
     driver_id = int(callback.data.split("=")[1])
     driver = await drivers.get_driver_info(driver_id)
@@ -23,7 +23,7 @@ async def manager_driver_decline(callback: types.CallbackQuery):
     await callback.message.delete()
 
 
-@dp.callback_query_handler(Text(startswith=DriverCallbacks.driver_manager_agree), ManagerCheck())
+@dp.callback_query_handler(Text(startswith=DriverCallbacks.driver_manager_agree), ManagerCheck(), AdminCheck())
 async def manager_driver_accept(callback: types.CallbackQuery):
     driver_id = int(callback.data.split("=")[1])
     driver = await drivers.get_driver_info(driver_id)

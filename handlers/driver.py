@@ -256,7 +256,10 @@ async def driver_ready_menu(callback: types.CallbackQuery):
     driver = await drivers.get_driver_info(callback.from_user.id)
     if driver.validate_info():
         manager_user_type = await users.select_user_type("manager")
+        admin_user_type = users.select_user_type("admin")
         managers = await users.select_users_by_type(manager_user_type)
+        admins = await users.select_users_by_type(admin_user_type)
+        managers.extend(admins)
         for manager in managers:
             await dp.bot.send_media_group(
                 chat_id=manager.telegram_id,

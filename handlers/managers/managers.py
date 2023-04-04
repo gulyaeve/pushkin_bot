@@ -12,6 +12,9 @@ async def copy_to_managers(message: types.Message):
         InlineKeyboardButton(text="Ответить", callback_data=f'reply_from_anytext_id={message.from_user.id}')]])
     manager_user_type = await users.select_user_type("manager")
     managers = await users.select_users_by_type(manager_user_type)
+    admin_user_type = await users.select_user_type("admin")
+    admins = await users.select_users_by_type(admin_user_type)
+    managers.extend(admins)
     for manager in managers:
         try:
             await dp.bot.copy_message(manager.telegram_id,

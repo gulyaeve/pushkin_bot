@@ -57,3 +57,6 @@ class Users:
 
     def __getitem__(self, key: int) -> User:
         return self._users[key]
+
+    def extend(self, new_users: Sequence[User]):
+        self._users += new_users
