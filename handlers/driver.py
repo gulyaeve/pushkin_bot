@@ -262,18 +262,23 @@ async def driver_ready_menu(callback: types.CallbackQuery):
                 chat_id=manager.telegram_id,
                 media=types.MediaGroup(
                     [
-                        types.InputMedia(f"{Config.MEDIA}/{driver.passport_photo}"),
-                        types.InputMedia(f"{Config.MEDIA}/{driver.sts_photo_1}"),
-                        types.InputMedia(f"{Config.MEDIA}/{driver.sts_photo_2}"),
+                        types.InputMediaPhoto(
+                            types.InputFile(f"{Config.MEDIA}/{driver.passport_photo}")
+                        ),
+                        types.InputMediaPhoto(
+                            types.InputFile(f"{Config.MEDIA}/{driver.sts_photo_1}")
+                        ),
+                        types.InputMediaPhoto(
+                            types.InputFile(f"{Config.MEDIA}/{driver.sts_photo_2}")
+                        ),
                     ]
-                )
+                ),
             )
-            # await dp.bot.send_photo(
-            #     chat_id=manager.telegram_id,
-            #     photo=types.InputFile(f"{Config.MEDIA}/{driver.passport_photo}"),
-            #     caption=f"<b>Новая анкета:</b>\n{str(driver)}",
-            #     reply_markup=make_manager_view(driver.telegram_id),
-            # )
+            await dp.bot.send_message(
+                chat_id=manager.telegram_id,
+                text=f"<b>Новая анкета:</b>\n{str(driver)}",
+                reply_markup=make_manager_view(driver.telegram_id),
+            )
         logging.info(f"Новая анкета водителя {driver.telegram_id}")
         await callback.answer(await messages.get_message("driver_info_validate_true"), show_alert=True)
         await callback.message.delete()
