@@ -17,6 +17,7 @@
   "taxi_select_address": "Выберите искомый адрес:",
   "taxi_wrong_address": "Адрес не найден",
   "taxi_select_fare": "Выберите тариф:",
+  "taxi_order_save": "Заказ опубликован, ожидайте сообщение с подтверждением.",
   "driver_reg_prompt": "Необходимо пройти регистрацию",
   "driver_reg_menu": "Меню регистрации:",
   "driver_wrong_input": "Введите текстом пожалуйста",

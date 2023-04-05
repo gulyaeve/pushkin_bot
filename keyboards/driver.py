@@ -15,6 +15,7 @@ class DriverCallbacks:
     driver_manager_agree = "driver_manager_agree"
     driver_help = "driver_help"
     driver_fare = "driver_fare"
+    driver_order_confirm = "driver_order_confirm"
 
 
 reg_button = InlineKeyboardMarkup(
@@ -126,3 +127,17 @@ driver_menu = InlineKeyboardMarkup(
         ]
     ]
 )
+
+
+def make_confirm_button(customer_id: int):
+    driver_order_confirm_button = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="Я беру заказ",
+                    callback_data=f"{DriverCallbacks.driver_order_confirm}={customer_id}"
+                )
+            ]
+        ]
+    )
+    return driver_order_confirm_button

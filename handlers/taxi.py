@@ -3,15 +3,16 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import StatesGroup, State
 
-from keyboards.keyboards import location_button
+from keyboards.driver import make_confirm_button
+from keyboards.keyboards import location_button, request_submit
 from loader import dp, openroute_api, taxi_fares, messages
-from utils.utilities import taxi_fare_price
 
 
 class OrderTaxi(StatesGroup):
     Departure = State()
     Destination = State()
     Fare = State()
+    Confirm = State()
 
 
 @dp.message_handler(commands=['taxi'])
@@ -119,27 +120,63 @@ async def taxi_set_departure(callback: types.CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(Text(startswith="fare="), state=OrderTaxi.Fare)
 async def taxi_set_fare(callback: types.CallbackQuery, state: FSMContext):
     fare = callback.data.split("=")[1]
+    # data = await state.get_data()
+    async with state.proxy() as data:
+        data['fare'] = fare
+    taxi_fare = await taxi_fares.select_fare_by_name(fare)
+    # price = taxi_fare_price(
+    #     distance=distance,
+    #     duration=duration,
+    #     min_price=taxi_fare.min_price,
+    #     min_distance=taxi_fare.min_distance,
+    #     min_duration=taxi_fare.min_duration,
+    #     km_price=taxi_fare.km_price,
+    #     minute_price=taxi_fare.minute_price,
+    # )
+    await callback.message.delete()
+    await callback.message.answer(
+        f"<b>Ваша поездка:</b>\n"
+        f"Тариф: {taxi_fare.name}\n"
+        f"<i>Минимальная стоимость: {taxi_fare.min_price}\n"
+        f"Включено километров: {taxi_fare.min_distance}\n"
+        f"Цена за каждый дополнительный километр: {taxi_fare.km_price}\n"
+        f"Включено минут: {taxi_fare.min_duration}\n"
+        f"Цена за дополнительные минуты: {taxi_fare.minute_price}\n\n</i>"
+        f"Отправляем заказ водителям?",
+        reply_markup=request_submit,
+    )
+    await OrderTaxi.Confirm.set()
+
+
+@dp.message_handler(Text(equals="Отправить"), state=OrderTaxi.Confirm)
+async def taxi_order_confirm(message: types.Message, state: FSMContext):
     data = await state.get_data()
+    fare = data['fare']
+    taxi_fare = await taxi_fares.select_fare_by_name(fare)
     distance, duration = await openroute_api.get_distance_and_duration(
         departure=[data['departure_longitude'], data['departure_latitude']],
         destination=[data['destination_longitude'], data['destination_latitude']],
     )
-    taxi_fare = await taxi_fares.select_fare_by_name(fare)
-    price = taxi_fare_price(
-        distance=distance,
-        duration=duration,
-        min_price=taxi_fare.min_price,
-        min_distance=taxi_fare.min_distance,
-        min_duration=taxi_fare.min_duration,
-        km_price=taxi_fare.km_price,
-        minute_price=taxi_fare.minute_price,
+    await dp.bot.send_location(
+        chat_id=taxi_fare.chat_id,
+        latitude=float(data['departure_latitude']),
+        longitude=float(data['departure_longitude']),
     )
-    await callback.message.delete()
-    await callback.message.answer(
-        f"Расстояние: {distance} км\n"
-        f"Примерное время в пути: {duration} минут\n"
-        f"Тариф: {taxi_fare.name}\n"
-        f"Цена поездки: {price} рублей",
-        reply_markup=types.ReplyKeyboardRemove()
+    await dp.bot.send_location(
+        chat_id=taxi_fare.chat_id,
+        latitude=float(data['destination_latitude']),
+        longitude=float(data['destination_longitude']),
+    )
+    await dp.bot.send_message(
+        chat_id=taxi_fare.chat_id,
+        text=f"Новый заказ:\n"
+             f"Примерное расстояние: {distance} км\n"
+             f"Примерное время в пути (без пробок): {duration} минут\n"
+             f"Тариф: {taxi_fare.name}\n",
+        reply_markup=make_confirm_button(message.from_user.id),
+    )
+    await message.answer(
+        text=(await messages.get_message("taxi_order_save")),
+        reply_markup=types.ReplyKeyboardRemove(),
     )
     await state.finish()

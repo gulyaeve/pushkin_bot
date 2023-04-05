@@ -16,6 +16,7 @@ class TaxiFare:
     minute_price: int
     min_distance: int
     min_duration: int
+    chat_id: int
 
 
 class TaxiFaresDB(Database):
@@ -33,7 +34,8 @@ class TaxiFaresDB(Database):
             km_price int8 DEFAULT 0,
             minute_price int8 DEFAULT 0,
             min_distance int8 DEFAULT 0,
-            min_duration int8 DEFAULT 0
+            min_duration int8 DEFAULT 0,
+            chat_id int8 DEFAULT 0
         );
         """
         await self._execute(sql, execute=True)
@@ -47,6 +49,7 @@ class TaxiFaresDB(Database):
             minute_price=record['minute_price'],
             min_distance=record['min_distance'],
             min_duration=record['min_duration'],
+            chat_id=record['chat_id'],
         )
 
     async def select_all_taxi_fare_name(self) -> [str]:
@@ -66,13 +69,15 @@ class TaxiFaresDB(Database):
             km_price: int,
             minute_price: int,
             min_distance: int,
-            min_duration: int) -> TaxiFare:
+            min_duration: int,
+            chat_id: int) -> TaxiFare:
         fare = await self._execute("SELECT * FROM taxi_fares WHERE name=$1", name, fetchrow=True)
         if fare is None:
-            sql = "INSERT INTO taxi_fares (name, min_price, km_price, minute_price, min_distance, min_duration) " \
-                  "VALUES($1, $2, $3, $4, $5, $6) returning *"
+            sql = "INSERT INTO taxi_fares " \
+                  "(name, min_price, km_price, minute_price, min_distance, min_duration, chat_id) " \
+                  "VALUES($1, $2, $3, $4, $5, $6, $7) returning *"
             record = await self._execute(
-                sql, name, min_price, km_price, minute_price, min_distance, min_duration, fetchrow=True
+                sql, name, min_price, km_price, minute_price, min_distance, min_duration, chat_id, fetchrow=True
             )
             logging.info(f"Fare {name} success save in db")
             return await self._format_fare(record)

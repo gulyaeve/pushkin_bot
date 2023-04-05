@@ -5,7 +5,8 @@
     "km_price": 20,
     "minute_price": 20,
     "min_distance": 3,
-    "min_duration": 10
+    "min_duration": 10,
+    "chat_id": -791200687
   },
   {
     "name": "Комфорт",
@@ -13,6 +14,7 @@
     "km_price": 25,
     "minute_price": 25,
     "min_distance": 3,
-    "min_duration": 10
+    "min_duration": 10,
+    "chat_id": -926830316
   }
 ]

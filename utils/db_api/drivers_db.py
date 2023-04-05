@@ -17,12 +17,7 @@ class Driver:
     sts_photo_2: str
 
     def validate_info(self) -> bool:
-        if self.fio != "" and \
-                self.phone != "" and \
-                self.passport != "" and \
-                self.passport_photo != "" and \
-                self.sts_photo_1 != "" and \
-                self.sts_photo_2 != "":
+        if self.fio and self.phone and self.passport and self.passport_photo and self.sts_photo_1 and self.sts_photo_2:
             return True
         else:
             return False

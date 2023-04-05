@@ -15,4 +15,5 @@ async def create_taxi_fares():
             minute_price=fare['minute_price'],
             min_distance=fare['min_distance'],
             min_duration=fare['min_duration'],
+            chat_id=fare['chat_id']
         )

@@ -2,6 +2,7 @@ import logging
 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import StatesGroup, State
 
 from config import Config
@@ -256,7 +257,7 @@ async def driver_ready_menu(callback: types.CallbackQuery):
     driver = await drivers.get_driver_info(callback.from_user.id)
     if driver.validate_info():
         manager_user_type = await users.select_user_type("manager")
-        admin_user_type = users.select_user_type("admin")
+        admin_user_type = await users.select_user_type("admin")
         managers = await users.select_users_by_type(manager_user_type)
         admins = await users.select_users_by_type(admin_user_type)
         managers.extend(admins)
@@ -287,16 +288,33 @@ async def driver_ready_menu(callback: types.CallbackQuery):
         await callback.message.delete()
     else:
         answer = "Необходимо заполнить:\n"
-        if driver.fio == "":
+        if not driver.fio:
             answer += "ФИО\n"
-        if driver.phone == "":
+        if not driver.phone:
             answer += "Номер телефона\n"
-        if driver.passport == "":
+        if not driver.passport:
             answer += "Паспортные данные\n"
-        if driver.passport_photo == "":
+        if not driver.passport_photo:
             answer += "Фото паспорта\n"
-        if driver.sts_photo_1 == "":
+        if not driver.sts_photo_1:
             answer += "Фото СТС (лицевая сторона)\n"
-        if driver.sts_photo_2 == "":
+        if not driver.sts_photo_2:
             answer += "Фото СТС (оборотная сторона)\n"
         await callback.answer(answer, show_alert=True)
+
+
+@dp.callback_query_handler(DriverCheck(), Text(startswith=DriverCallbacks.driver_order_confirm))
+async def driver_order_confirm(callback: types.CallbackQuery):
+    driver = await drivers.get_driver_info(callback.from_user.id)
+    customer_id = int(callback.data.split("=")[1])
+    await callback.answer("Вы взяли заказ", show_alert=True)
+    await dp.bot.send_message(
+        chat_id=customer_id,
+        text=f"Водитель {driver.fio} начал выполнение вашего заказа.",
+    )
+    await callback.message.delete_reply_markup()
+
+
+@dp.callback_query_handler(Text(startswith=DriverCallbacks.driver_order_confirm))
+async def no_driver_order_confirm(callback: types.CallbackQuery):
+    await callback.answer("Вы не зарегистрированы как водитель", show_alert=True)
