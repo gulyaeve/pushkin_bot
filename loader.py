@@ -5,7 +5,6 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.redis import RedisStorage2
 
 from config import Config
-from utils.db_api.db import Database
 from utils.db_api.drivers_db import DriversDB
 from utils.db_api.taxi_fares import TaxiFaresDB
 from utils.db_api.usersdb import UsersDB
