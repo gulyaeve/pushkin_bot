@@ -15,6 +15,9 @@ class Order:
     departure_longitude: float
     destination_latitude: float
     destination_longitude: float
+    distance: int
+    duration: int
+    fare: str
     status: str
 
 
@@ -29,11 +32,14 @@ class OrdersDB(Database):
         CREATE TABLE IF NOT EXISTS orders (
             id SERIAL PRIMARY KEY,
             customer_id bigint references users (telegram_id),
-            driver_id bigint references drivers (telegram_id),
+            driver_id bigint references drivers (telegram_id) DEFAULT NULL,
             departure_latitude float,
             departure_longitude float,
             destination_latitude float,
             destination_longitude float,
+            distance int,
+            duration int,
+            fare character varying(255) references taxi_fares (name),
             status character varying(255),
             time_created timestamp DEFAULT now()
         );
@@ -50,7 +56,10 @@ class OrdersDB(Database):
             departure_longitude=record['departure_longitude'],
             destination_latitude=record['destination_latitude'],
             destination_longitude=record['destination_longitude'],
+            distance=record['distance'],
+            duration=record['duration'],
+            fare=record['fare'],
             status=record['status'],
         )
 
-
+    # async def new_order(self, customer_id, departure_latitude, departure_longitude, destination_latitude, destination_longitude):
