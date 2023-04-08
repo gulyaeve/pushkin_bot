@@ -47,7 +47,7 @@ class DriversDB(Database):
             sts_photo_2 character varying(255) DEFAULT NULL
         );
         """
-        await self._execute(sql, execute=True)
+        await self.execute(sql, execute=True)
 
     @staticmethod
     async def _format_driver(record: asyncpg.Record) -> Driver:
@@ -63,7 +63,7 @@ class DriversDB(Database):
 
     async def _select_driver(self, telegram_id: int) -> asyncpg.Record:
         sql = "SELECT * FROM drivers WHERE telegram_id=$1"
-        return await self._execute(sql, telegram_id, fetchrow=True)
+        return await self.execute(sql, telegram_id, fetchrow=True)
 
     async def get_driver_info(self, telegram_id: int) -> Driver:
         return await self._format_driver(await self._select_driver(telegram_id))
@@ -74,17 +74,17 @@ class DriversDB(Database):
             return await self._format_driver(exist_driver)
         else:
             sql = "INSERT INTO drivers (telegram_id) VALUES($1) returning *"
-            record = await self._execute(sql, telegram_id, fetchrow=True)
+            record = await self.execute(sql, telegram_id, fetchrow=True)
             return await self._format_driver(record)
 
     async def update_driver_info(self, telegram_id: int, **kwargs):
         for name, value in kwargs.items():
             sql = f"UPDATE drivers SET {name}=$2 WHERE telegram_id=$1"
-            await self._execute(sql, telegram_id, value, execute=True)
-        return await self._format_driver(await self._select_driver(telegram_id))
+            await self.execute(sql, telegram_id, value, execute=True)
+        return await self.get_driver_info(telegram_id)
 
     async def remove_driver(self, telegram_id: int):
-        await self._execute("DELETE FROM drivers WHERE telegram_id=$1", telegram_id, execute=True)
+        await self.execute("DELETE FROM drivers WHERE telegram_id=$1", telegram_id, execute=True)
 
 
 # loop = asyncio.get_event_loop()

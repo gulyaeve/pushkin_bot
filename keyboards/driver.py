@@ -129,13 +129,13 @@ driver_menu = InlineKeyboardMarkup(
 )
 
 
-def make_confirm_button(customer_id: int):
+def make_confirm_button(order_id: int):
     driver_order_confirm_button = InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
                     text="Я беру заказ",
-                    callback_data=f"{DriverCallbacks.driver_order_confirm}={customer_id}"
+                    callback_data=f"{DriverCallbacks.driver_order_confirm}={order_id}"
                 )
             ]
         ]

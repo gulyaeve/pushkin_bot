@@ -1,3 +1,5 @@
+import logging
+
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
@@ -5,7 +7,8 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 
 from keyboards.driver import make_confirm_button
 from keyboards.keyboards import location_button, request_submit
-from loader import dp, openroute_api, taxi_fares, messages
+from loader import dp, openroute_api, taxi_fares, messages, orders
+from utils.db_api.orders_db import OrderStatuses
 
 
 class OrderTaxi(StatesGroup):
@@ -157,6 +160,18 @@ async def taxi_order_confirm(message: types.Message, state: FSMContext):
         departure=[data['departure_longitude'], data['departure_latitude']],
         destination=[data['destination_longitude'], data['destination_latitude']],
     )
+    new_order = await orders.new_order(
+        customer_id=message.from_user.id,
+        departure_latitude=float(data['departure_latitude']),
+        departure_longitude=float(data['departure_longitude']),
+        destination_latitude=float(data['destination_latitude']),
+        destination_longitude=float(data['destination_longitude']),
+        distance=distance,
+        duration=duration,
+        fare=taxi_fare.id,
+        status=OrderStatuses.new,
+    )
+    logging.info(f"Order saved {new_order}")
     await dp.bot.send_location(
         chat_id=taxi_fare.chat_id,
         latitude=float(data['departure_latitude']),
@@ -169,11 +184,11 @@ async def taxi_order_confirm(message: types.Message, state: FSMContext):
     )
     await dp.bot.send_message(
         chat_id=taxi_fare.chat_id,
-        text=f"Новый заказ:\n"
+        text=f"Новый заказ №{new_order.id}:\n"
              f"Примерное расстояние: {distance} км\n"
              f"Примерное время в пути (без пробок): {duration} минут\n"
              f"Тариф: {taxi_fare.name}\n",
-        reply_markup=make_confirm_button(message.from_user.id),
+        reply_markup=make_confirm_button(new_order.id),
     )
     await message.answer(
         text=(await messages.get_message("taxi_order_save")),

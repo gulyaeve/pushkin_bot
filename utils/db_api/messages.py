@@ -18,26 +18,26 @@ class Messages(Database):
             content text
         );
         """
-        await self._execute(sql, execute=True)
+        await self.execute(sql, execute=True)
 
     # Сообщения
     async def add_message(self, description, content):
         sql = "INSERT INTO messages (description, content) VALUES($1, $2) returning *"
-        return await self._execute(sql, description, content, fetchrow=True)
+        return await self.execute(sql, description, content, fetchrow=True)
 
     async def select_all_messages(self):
         sql = "SELECT * FROM messages"
-        return await self._execute(sql, fetch=True)
+        return await self.execute(sql, fetch=True)
 
     async def get_message_content(self, description):
-        return await self._execute("SELECT content FROM messages WHERE description=$1", description, fetchval=True)
+        return await self.execute("SELECT content FROM messages WHERE description=$1", description, fetchval=True)
 
     async def get_message_content_by_id(self, message_id):
-        return await self._execute("SELECT content FROM messages WHERE id=$1", message_id, fetchval=True)
+        return await self.execute("SELECT content FROM messages WHERE id=$1", message_id, fetchval=True)
 
     async def update_text_content(self, new_text, message_id):
         sql = "UPDATE messages SET content=$1 WHERE id=$2"
-        return await self._execute(sql, new_text, message_id, execute=True)
+        return await self.execute(sql, new_text, message_id, execute=True)
 
     async def create_message(self, description: str, content: str):
         """

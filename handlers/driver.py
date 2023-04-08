@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 from aiogram import types
@@ -9,7 +10,8 @@ from config import Config
 from filters import DriverCheck
 from keyboards.driver import reg_button, make_driver_reg_menu, DriverCallbacks, make_manager_view, driver_menu
 from keyboards.keyboards import auth_phone
-from loader import dp, messages, drivers, users
+from loader import dp, messages, drivers, users, orders
+from utils.db_api.orders_db import OrderStatuses
 
 
 class DriverStates(StatesGroup):
@@ -283,7 +285,7 @@ async def driver_ready_menu(callback: types.CallbackQuery):
                 text=f"<b>Новая анкета:</b>\n{str(driver)}",
                 reply_markup=make_manager_view(driver.telegram_id),
             )
-        logging.info(f"Новая анкета водителя {driver.telegram_id}")
+        logging.info(f"Новая анкета водителя {driver}")
         await callback.answer(await messages.get_message("driver_info_validate_true"), show_alert=True)
         await callback.message.delete()
     else:
@@ -306,10 +308,18 @@ async def driver_ready_menu(callback: types.CallbackQuery):
 @dp.callback_query_handler(DriverCheck(), Text(startswith=DriverCallbacks.driver_order_confirm))
 async def driver_order_confirm(callback: types.CallbackQuery):
     driver = await drivers.get_driver_info(callback.from_user.id)
-    customer_id = int(callback.data.split("=")[1])
+    order_id = int(callback.data.split("=")[1])
+    order = await orders.get_order_info(order_id)
+    changed_order = await orders.update_order_info(
+        order.id,
+        driver_id=driver.telegram_id,
+        status=OrderStatuses.in_progress,
+        time_assigned=datetime.datetime.now(),
+    )
+    logging.info(f"Заказ изменен {changed_order}")
     await callback.answer("Вы взяли заказ", show_alert=True)
     await dp.bot.send_message(
-        chat_id=customer_id,
+        chat_id=order.customer_id,
         text=f"Водитель {driver.fio} начал выполнение вашего заказа.",
     )
     await callback.message.delete_reply_markup()
