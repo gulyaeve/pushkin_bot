@@ -1,8 +1,9 @@
 from logging import log, INFO
 
 from aiogram import types
+from aiogram.dispatcher.filters import ChatTypeFilter
 
-from aiogram.types import ContentType
+from aiogram.types import ContentType, ChatType
 
 from handlers.admins.admins import notify_admins
 from handlers.managers.managers import copy_to_managers
@@ -16,7 +17,7 @@ async def add_to_groups(message: types.Message):
                         f"id этой группы <code>{message.chat.id}</code>")
 
 
-@dp.message_handler(content_types=ContentType.ANY)
+@dp.message_handler(ChatTypeFilter(chat_type=ChatType.PRIVATE), content_types=ContentType.ANY)
 async def content_handler(message: types.Message):
     """
     Any content handler
