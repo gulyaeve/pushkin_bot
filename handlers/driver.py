@@ -11,7 +11,7 @@ from config import Config
 from filters import DriverCheck
 from keyboards.driver import reg_button, make_driver_reg_menu, DriverCallbacks, make_manager_view, driver_menu
 from keyboards.keyboards import auth_phone
-from loader import dp, messages, drivers, users, orders
+from loader import dp, messages, drivers, users, orders, bot_info
 from utils.db_api.orders_db import OrderStatuses
 
 
@@ -29,6 +29,12 @@ async def driver_start(message: types.Message):
     await message.answer(await messages.get_message("driver_menu"), reply_markup=driver_menu)
 
 
+@dp.message_handler(DriverCheck(), commands=['driver'])
+async def driver_start(message: types.Message):
+    msg = await messages.get_message("wrong_chat")
+    await message.answer(f"{msg} {bot_info.mention}")
+
+
 @dp.callback_query_handler(DriverCheck(), state=DriverStates.all_states)
 @dp.callback_query_handler(DriverCheck(), text=[DriverCallbacks.driver_back, DriverCallbacks.driver_reg_menu])
 async def driver_start(callback: types.CallbackQuery, state: FSMContext):
@@ -39,6 +45,12 @@ async def driver_start(callback: types.CallbackQuery, state: FSMContext):
 @dp.message_handler(ChatTypeFilter(chat_type=ChatType.PRIVATE), commands=['driver'])
 async def driver_start_no_auth(message: types.Message):
     await message.answer(await messages.get_message("driver_reg_prompt"), reply_markup=reg_button)
+
+
+@dp.message_handler(commands=['driver'])
+async def driver_start_no_auth(message: types.Message):
+    msg = await messages.get_message("wrong_chat")
+    await message.answer(f"{msg} {bot_info.mention}")
 
 
 @dp.callback_query_handler(text=DriverCallbacks.driver_back)

@@ -8,7 +8,7 @@ from aiogram.types import ChatType
 
 from keyboards.driver import make_confirm_button
 from keyboards.keyboards import location_button, request_submit
-from loader import dp, openroute_api, taxi_fares, messages, orders
+from loader import dp, openroute_api, taxi_fares, messages, orders, bot_info
 from utils.db_api.orders_db import OrderStatuses
 
 
@@ -23,6 +23,12 @@ class OrderTaxi(StatesGroup):
 async def taxi_start_order(message: types.Message):
     await message.answer(await messages.get_message("taxi_departure"), reply_markup=location_button)
     await OrderTaxi.Departure.set()
+
+
+@dp.message_handler(commands=['taxi'])
+async def taxi_start_order(message: types.Message):
+    msg = await messages.get_message("wrong_chat")
+    await message.answer(f"{msg} {bot_info.mention}")
 
 
 @dp.message_handler(state=OrderTaxi.Departure, content_types=types.ContentType.LOCATION)
