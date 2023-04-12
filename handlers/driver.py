@@ -3,8 +3,9 @@ import logging
 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters import Text
+from aiogram.dispatcher.filters import Text, ChatTypeFilter
 from aiogram.dispatcher.filters.state import StatesGroup, State
+from aiogram.types import ChatType
 
 from config import Config
 from filters import DriverCheck
@@ -23,7 +24,7 @@ class DriverStates(StatesGroup):
     STSPhoto2 = State()
 
 
-@dp.message_handler(DriverCheck(), commands=['driver'])
+@dp.message_handler(ChatTypeFilter(chat_type=ChatType.PRIVATE), DriverCheck(), commands=['driver'])
 async def driver_start(message: types.Message):
     await message.answer(await messages.get_message("driver_menu"), reply_markup=driver_menu)
 
@@ -35,7 +36,7 @@ async def driver_start(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.edit_text(await messages.get_message("driver_menu"), reply_markup=driver_menu)
 
 
-@dp.message_handler(commands=['driver'])
+@dp.message_handler(ChatTypeFilter(chat_type=ChatType.PRIVATE), commands=['driver'])
 async def driver_start_no_auth(message: types.Message):
     await message.answer(await messages.get_message("driver_reg_prompt"), reply_markup=reg_button)
 

@@ -2,8 +2,9 @@ import logging
 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters import Text
+from aiogram.dispatcher.filters import Text, ChatTypeFilter
 from aiogram.dispatcher.filters.state import StatesGroup, State
+from aiogram.types import ChatType
 
 from keyboards.driver import make_confirm_button
 from keyboards.keyboards import location_button, request_submit
@@ -18,7 +19,7 @@ class OrderTaxi(StatesGroup):
     Confirm = State()
 
 
-@dp.message_handler(commands=['taxi'])
+@dp.message_handler(ChatTypeFilter(chat_type=ChatType.PRIVATE), commands=['taxi'])
 async def taxi_start_order(message: types.Message):
     await message.answer(await messages.get_message("taxi_departure"), reply_markup=location_button)
     await OrderTaxi.Departure.set()
