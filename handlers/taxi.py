@@ -28,7 +28,7 @@ async def taxi_start_order(message: types.Message):
 @dp.message_handler(commands=['taxi'])
 async def taxi_start_order(message: types.Message):
     msg = await messages.get_message("wrong_chat")
-    await message.answer(f"{msg} {bot_info.mention}")
+    await message.reply(f"{msg} {bot_info.mention}")
 
 
 @dp.message_handler(state=OrderTaxi.Departure, content_types=types.ContentType.LOCATION)

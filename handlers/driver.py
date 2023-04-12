@@ -32,7 +32,7 @@ async def driver_start(message: types.Message):
 @dp.message_handler(DriverCheck(), commands=['driver'])
 async def driver_start(message: types.Message):
     msg = await messages.get_message("wrong_chat")
-    await message.answer(f"{msg} {bot_info.mention}")
+    await message.reply(f"{msg} {bot_info.mention}")
 
 
 @dp.callback_query_handler(DriverCheck(), state=DriverStates.all_states)
@@ -50,7 +50,7 @@ async def driver_start_no_auth(message: types.Message):
 @dp.message_handler(commands=['driver'])
 async def driver_start_no_auth(message: types.Message):
     msg = await messages.get_message("wrong_chat")
-    await message.answer(f"{msg} {bot_info.mention}")
+    await message.reply(f"{msg} {bot_info.mention}")
 
 
 @dp.callback_query_handler(text=DriverCallbacks.driver_back)
