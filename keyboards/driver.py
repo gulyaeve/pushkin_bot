@@ -16,6 +16,9 @@ class DriverCallbacks:
     driver_help = "driver_help"
     driver_fare = "driver_fare"
     driver_order_confirm = "driver_order_confirm"
+    driver_order_start_location = "driver_order_start_location"
+    driver_order_message = "driver_order_message"
+    driver_order_finish = "driver_order_finish"
 
 
 reg_button = InlineKeyboardMarkup(
@@ -129,7 +132,7 @@ driver_menu = InlineKeyboardMarkup(
 )
 
 
-def make_confirm_button(order_id: int):
+def make_confirm_button(order_id: int) -> InlineKeyboardMarkup:
     driver_order_confirm_button = InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -141,3 +144,43 @@ def make_confirm_button(order_id: int):
         ]
     )
     return driver_order_confirm_button
+
+
+def make_order_menu(order_id: int) -> InlineKeyboardMarkup:
+    driver_order_menu = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="Я на месте подачи 📍",
+                    callback_data=f"{DriverCallbacks.driver_order_start_location}={order_id}"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="Написать пассажиру 💬",
+                    callback_data=f"{DriverCallbacks.driver_order_message}={order_id}"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="Завершить заказ 🏁",
+                    callback_data=f"{DriverCallbacks.driver_order_finish}={order_id}"
+                )
+            ]
+        ]
+    )
+    return driver_order_menu
+
+
+def make_customer_answer_button(order_id: int) -> InlineKeyboardMarkup:
+    customer_answer = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="Ответить водителю",
+                    callback_data=f"customer_answer={order_id}"
+                )
+            ]
+        ]
+    )
+    return customer_answer

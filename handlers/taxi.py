@@ -202,3 +202,35 @@ async def taxi_order_confirm(message: types.Message, state: FSMContext):
         reply_markup=types.ReplyKeyboardRemove(),
     )
     await state.finish()
+
+
+@dp.callback_query_handler(Text(startswith="customer_answer"))
+async def customer_answer(callback: types.CallbackQuery, state: FSMContext):
+    order_id = int(callback.data.split("=")[1])
+    order = await orders.get_order_info(order_id)
+    async with state.proxy() as data:
+        data["customer_private_user_id"] = order.driver_id
+        data["order_id"] = order.id
+    await callback.message.answer(f"Введите сообщение:")
+    await state.set_state(f"CUSTOMER_PRIVATE_MSG")
+
+
+@dp.message_handler(state="CUSTOMER_PRIVATE_MSG", content_types=types.ContentType.ANY)
+async def customer_send_answer(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    try:
+        await dp.bot.send_message(
+            chat_id=data['customer_private_user_id'],
+            text="Клиент сообщает:"
+        )
+        await dp.bot.copy_message(
+            chat_id=data['customer_private_user_id'],
+            from_chat_id=message.from_id,
+            message_id=message.message_id
+        )
+        logging.info(f'От пользователя водителю [{data["customer_private_user_id"]=}] отправлено: {message.message_id}')
+        await message.answer('Сообщение отправлено')
+    except Exception as e:
+        await message.answer('Ошибка при отправке')
+        logging.info(f"Failed to send message: {e}")
+    await state.finish()

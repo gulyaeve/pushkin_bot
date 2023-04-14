@@ -9,7 +9,8 @@ from aiogram.types import ChatType
 
 from config import Config
 from filters import DriverCheck
-from keyboards.driver import reg_button, make_driver_reg_menu, DriverCallbacks, make_manager_view, driver_menu
+from keyboards.driver import reg_button, make_driver_reg_menu, DriverCallbacks, make_manager_view, driver_menu, \
+    make_order_menu, make_customer_answer_button
 from keyboards.keyboards import auth_phone
 from loader import dp, messages, drivers, users, orders, bot_info
 from utils.db_api.orders_db import OrderStatuses
@@ -318,6 +319,7 @@ async def driver_ready_menu(callback: types.CallbackQuery):
         await callback.answer(answer, show_alert=True)
 
 
+# TODO: Добавить фильтр на активные заказы
 @dp.callback_query_handler(DriverCheck(), Text(startswith=DriverCallbacks.driver_order_confirm))
 async def driver_order_confirm(callback: types.CallbackQuery):
     driver = await drivers.get_driver_info(callback.from_user.id)
@@ -330,9 +332,14 @@ async def driver_order_confirm(callback: types.CallbackQuery):
         time_assigned=datetime.datetime.now(),
     )
     logging.info(f"Заказ изменен {changed_order}")
-    await callback.answer("Вы взяли заказ", show_alert=True)
+    await callback.answer(f"Вы взяли заказ {changed_order.id}, информация в личной беседе", show_alert=True)
     await dp.bot.send_message(
-        chat_id=order.customer_id,
+        chat_id=changed_order.driver_id,
+        text=f"У вас активный заказ № {changed_order.id}",
+        reply_markup=make_order_menu(order_id=changed_order.id),
+    )
+    await dp.bot.send_message(
+        chat_id=changed_order.customer_id,
         text=f"Водитель {driver.fio} начал выполнение вашего заказа.",
     )
     await callback.message.delete_reply_markup()
@@ -341,3 +348,68 @@ async def driver_order_confirm(callback: types.CallbackQuery):
 @dp.callback_query_handler(Text(startswith=DriverCallbacks.driver_order_confirm))
 async def no_driver_order_confirm(callback: types.CallbackQuery):
     await callback.answer("Вы не зарегистрированы как водитель", show_alert=True)
+
+
+@dp.callback_query_handler(Text(startswith=DriverCallbacks.driver_order_start_location))
+async def driver_on_start_location(callback: types.CallbackQuery):
+    order_id = int(callback.data.split("=")[1])
+    order = await orders.get_order_info(order_id)
+    logging.info(f"По заказу {order.id} водитель {order.driver_id} приехал к клиенту {order.customer_id}")
+    await dp.bot.send_message(
+        chat_id=order.customer_id,
+        text=f"Водитель ожидает вас 🚖",
+    )
+    await callback.answer("Клиенту отправлено уведомление о подаче", show_alert=True)
+
+
+@dp.callback_query_handler(Text(startswith=DriverCallbacks.driver_order_finish))
+async def driver_order_finish(callback: types.CallbackQuery):
+    order_id = int(callback.data.split("=")[1])
+    order = await orders.get_order_info(order_id)
+    logging.info(f"Водитель {order.driver_id} завершил заказ {order.id}")
+    changed_order = await orders.update_order_info(
+        order_id,
+        status=OrderStatuses.finished,
+        time_finished=datetime.datetime.now(),
+    )
+    logging.info(f"Заказ изменен {changed_order}")
+    await callback.answer(f"Вы завершили заказ {order.id}", show_alert=True)
+    await dp.bot.send_message(
+        chat_id=changed_order.customer_id,
+        text=f"Водитель завершил ваш заказ 🏁"
+    )
+    await callback.message.delete()
+
+
+@dp.callback_query_handler(Text(startswith=DriverCallbacks.driver_order_message))
+async def driver_order_message(callback: types.CallbackQuery, state: FSMContext):
+    order_id = int(callback.data.split("=")[1])
+    order = await orders.get_order_info(order_id)
+    async with state.proxy() as data:
+        data["driver_private_user_id"] = order.customer_id
+        data["order_id"] = order.id
+    await callback.message.answer(f"Введите сообщение:")
+    await state.set_state(f"DRIVER_PRIVATE_MSG")
+
+
+@dp.message_handler(state="DRIVER_PRIVATE_MSG", content_types=types.ContentType.ANY)
+async def driver_send_answer(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    try:
+        await dp.bot.send_message(
+            chat_id=data['driver_private_user_id'],
+            text="Водитель сообщает:"
+        )
+        await dp.bot.copy_message(
+            chat_id=data['driver_private_user_id'],
+            from_chat_id=message.from_id,
+            message_id=message.message_id,
+            reply_markup=make_customer_answer_button(data['order_id'])
+        )
+        logging.info(f'От водителя пользователю [{data["driver_private_user_id"]=}] отправлено: {message.message_id}')
+        await message.answer('Сообщение отправлено')
+    except Exception as e:
+        await message.answer('Ошибка при отправке')
+        logging.info(f"Failed to send message: {e}")
+    await state.finish()
+
