@@ -160,6 +160,7 @@ async def driver_input_car_number(message: types.Message):
         reply_markup=types.ForceReply()
     )
 
+
 @dp.callback_query_handler(text=DriverCallbacks.driver_passport)
 async def driver_passport_menu(callback: types.CallbackQuery):
     await callback.message.edit_text(await messages.get_message("driver_input_passport"))
