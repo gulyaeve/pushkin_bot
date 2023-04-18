@@ -158,12 +158,12 @@ def make_order_menu(order_id: int) -> InlineKeyboardMarkup:
                     callback_data=f"{DriverCallbacks.driver_order_start_location}={order_id}"
                 )
             ],
-            [
-                InlineKeyboardButton(
-                    text="Написать пассажиру 💬",
-                    callback_data=f"{DriverCallbacks.driver_order_message}={order_id}"
-                )
-            ],
+            # [
+            #     InlineKeyboardButton(
+            #         text="Написать пассажиру 💬",
+            #         callback_data=f"{DriverCallbacks.driver_order_message}={order_id}"
+            #     )
+            # ],
             [
                 InlineKeyboardButton(
                     text="Завершить заказ 🏁",
@@ -175,15 +175,15 @@ def make_order_menu(order_id: int) -> InlineKeyboardMarkup:
     return driver_order_menu
 
 
-def make_customer_answer_button(order_id: int) -> InlineKeyboardMarkup:
-    customer_answer = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text="Написать водителю",
-                    callback_data=f"customer_answer={order_id}"
-                )
-            ]
-        ]
-    )
-    return customer_answer
+# def make_customer_answer_button(order_id: int) -> InlineKeyboardMarkup:
+#     customer_answer = InlineKeyboardMarkup(
+#         inline_keyboard=[
+#             [
+#                 InlineKeyboardButton(
+#                     text="Написать водителю",
+#                     callback_data=f"customer_answer={order_id}"
+#                 )
+#             ]
+#         ]
+#     )
+#     return customer_answer

@@ -1,4 +1,5 @@
 from logging import log, INFO
+from typing import Union
 
 from aiogram import types
 from aiogram.dispatcher.filters import BoundFilter
