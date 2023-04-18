@@ -5,7 +5,6 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text, ChatTypeFilter, Regexp
 from aiogram.dispatcher.filters.state import StatesGroup, State
-from aiogram.types import ChatType
 
 from config import Config
 from filters import DriverCheck
@@ -29,7 +28,7 @@ class DriverStates(StatesGroup):
     STSPhoto2 = State()
 
 
-@dp.message_handler(ChatTypeFilter(chat_type=ChatType.PRIVATE), DriverCheck(), commands=['driver'])
+@dp.message_handler(ChatTypeFilter(chat_type=types.ChatType.PRIVATE), DriverCheck(), commands=['driver'])
 async def driver_start(message: types.Message):
     await message.answer(await messages.get_message("driver_menu"), reply_markup=driver_menu)
 
@@ -47,7 +46,7 @@ async def driver_start(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.edit_text(await messages.get_message("driver_menu"), reply_markup=driver_menu)
 
 
-@dp.message_handler(ChatTypeFilter(chat_type=ChatType.PRIVATE), commands=['driver'])
+@dp.message_handler(ChatTypeFilter(chat_type=types.ChatType.PRIVATE), commands=['driver'])
 async def driver_start_no_auth(message: types.Message):
     await message.answer(await messages.get_message("driver_reg_prompt"), reply_markup=reg_button)
 
@@ -147,14 +146,19 @@ async def driver_input_car_number(message: types.Message, state: FSMContext):
         await state.finish()
     except Exception as e:
         logging.info(f"Номер {message.text} уже есть в базе или другая ошибка {e}")
-        return await message.answer(await messages.get_message("driver_wrong_car_number"))
+        return await message.answer(
+            await messages.get_message("driver_wrong_car_number"),
+            reply_markup=types.ForceReply()
+        )
 
 
 @dp.message_handler(state=DriverStates.CarNumber, content_types=types.ContentType.TEXT)
 async def driver_input_car_number(message: types.Message):
     logging.info(f"[{message.from_id}] Введен НЕ корректный номер авто {message.text}")
-    return await message.answer(await messages.get_message("driver_wrong_car_number"))
-
+    return await message.answer(
+        await messages.get_message("driver_wrong_car_number"),
+        reply_markup=types.ForceReply()
+    )
 
 @dp.callback_query_handler(text=DriverCallbacks.driver_passport)
 async def driver_passport_menu(callback: types.CallbackQuery):
