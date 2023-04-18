@@ -1,10 +1,13 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
+from utils.db_api.drivers_db import Driver
+
 
 class DriverCallbacks:
     driver_reg_menu = "driver_reg_menu"
     driver_fio = "driver_fio"
     driver_phone = "driver_phone"
+    driver_car_number = "driver_car_number"
     driver_passport = "driver_passport"
     driver_passport_photo = "driver_passport_photo"
     driver_sts_1 = "driver_sts_1"
@@ -52,48 +55,48 @@ def make_manager_view(driver_id: int) -> InlineKeyboardMarkup:
     return manager_view
 
 
-def make_driver_reg_menu(
-        fio: bool = False,
-        phone: bool = False,
-        passport: bool = False,
-        passport_photo: bool = False,
-        sts_photo_1: bool = False,
-        sts_photo_2: bool = False):
+def make_driver_reg_menu(driver: Driver) -> InlineKeyboardMarkup:
     reg_menu = InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="ФИО" if not fio else "ФИО ✅",
+                    text="ФИО" if not driver.fio else "ФИО ✅",
                     callback_data=DriverCallbacks.driver_fio,
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Телефон" if not phone else "Телефон ✅",
+                    text="Телефон" if not driver.phone else "Телефон ✅",
                     callback_data=DriverCallbacks.driver_phone,
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Паспорт" if not passport else "Паспорт ✅",
+                    text="Номер авто" if not driver.car_number else "Номер авто ✅",
+                    callback_data=DriverCallbacks.driver_car_number,
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="Паспорт" if not driver.passport else "Паспорт ✅",
                     callback_data=DriverCallbacks.driver_passport,
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Фото паспорта" if not passport_photo else "Фото паспорта ✅",
+                    text="Фото паспорта" if not driver.passport_photo else "Фото паспорта ✅",
                     callback_data=DriverCallbacks.driver_passport_photo,
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Фото СТС лицевая сторона" if not sts_photo_1 else "Фото СТС лицевая сторона ✅",
+                    text="Фото СТС лицевая сторона" if not driver.sts_photo_1 else "Фото СТС лицевая сторона ✅",
                     callback_data=DriverCallbacks.driver_sts_1,
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="Фото СТС оборотная сторона" if not sts_photo_2 else "Фото СТС оборотная сторона ✅",
+                    text="Фото СТС оборотная сторона" if not driver.sts_photo_2 else "Фото СТС оборотная сторона ✅",
                     callback_data=DriverCallbacks.driver_sts_2,
                 )
             ],

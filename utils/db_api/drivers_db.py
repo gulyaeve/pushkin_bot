@@ -15,9 +15,16 @@ class Driver:
     passport_photo: str
     sts_photo_1: str
     sts_photo_2: str
+    car_number: str
 
     def validate_info(self) -> bool:
-        if self.fio and self.phone and self.passport and self.passport_photo and self.sts_photo_1 and self.sts_photo_2:
+        if self.fio \
+                and self.phone \
+                and self.passport \
+                and self.passport_photo \
+                and self.sts_photo_1 \
+                and self.sts_photo_2\
+                and self.car_number:
             return True
         else:
             return False
@@ -25,7 +32,8 @@ class Driver:
     def __str__(self):
         msg = f"ФИО: {self.fio}\n" \
               f"Телефон: {self.phone}\n" \
-              f"Паспорт: {self.passport}\n"
+              f"Паспорт: {self.passport}\n" \
+              f"Номер машины: {self.car_number}"
         return msg
 
 
@@ -41,6 +49,7 @@ class DriversDB(Database):
             telegram_id bigint NOT NULL UNIQUE PRIMARY KEY,
             fio character varying(255) DEFAULT NULL,
             phone character varying(255) UNIQUE DEFAULT NULL,
+            car_number character varying(255) UNIQUE DEFAULT NULL,
             passport character varying(255) DEFAULT NULL,
             passport_photo character varying(255) DEFAULT NULL,
             sts_photo_1 character varying(255) DEFAULT NULL,
@@ -59,6 +68,7 @@ class DriversDB(Database):
             passport_photo=record['passport_photo'],
             sts_photo_1=record['sts_photo_1'],
             sts_photo_2=record['sts_photo_2'],
+            car_number=record['car_number']
         )
 
     async def _select_driver(self, telegram_id: int) -> asyncpg.Record:

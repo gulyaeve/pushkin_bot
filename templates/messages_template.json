@@ -26,6 +26,8 @@
   "driver_input_fio": "Введите ФИО:",
   "driver_input_passport": "Введите паспортные данные:",
   "driver_input_phone": "Введите номер телефона или поделитесь через кнопку:",
+  "driver_input_car_number": "Введите номер авто в формате х111хх77:",
+  "driver_wrong_car_number": "Номер не соответствует формату",
   "driver_input_passport_photo": "Отправьте фото паспорта:",
   "driver_input_sts_photo_1": "Отправьте фото стс (лицевая сторона):",
   "driver_input_sts_photo_2": "Отправьте фото стс (оборотная сторона):",
