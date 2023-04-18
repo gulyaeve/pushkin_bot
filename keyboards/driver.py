@@ -180,7 +180,7 @@ def make_customer_answer_button(order_id: int) -> InlineKeyboardMarkup:
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="Ответить водителю",
+                    text="Написать водителю",
                     callback_data=f"customer_answer={order_id}"
                 )
             ]

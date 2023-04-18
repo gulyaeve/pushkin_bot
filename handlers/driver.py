@@ -307,6 +307,7 @@ async def driver_order_confirm(callback: types.CallbackQuery):
     await dp.bot.send_message(
         chat_id=changed_order.customer_id,
         text=f"Водитель {driver.fio} начал выполнение вашего заказа.",
+        reply_markup=make_customer_answer_button(order_id=changed_order.id),
     )
     await callback.message.delete_reply_markup()
 
