@@ -138,12 +138,16 @@ async def driver_car_number_menu(callback: types.CallbackQuery):
 
 @dp.message_handler(Regexp(car_number_regexp), state=DriverStates.CarNumber, content_types=types.ContentType.TEXT)
 async def driver_input_car_number(message: types.Message, state: FSMContext):
-    driver = await drivers.update_driver_info(message.from_user.id, car_number=message.text.upper())
-    logging.info(f"[{driver.telegram_id}] Введен корректный номер авто {driver.car_number}")
-    menu = make_driver_reg_menu(driver)
-    await message.answer(await messages.get_message("driver_correct_input"))
-    await message.answer(await messages.get_message("driver_reg_menu"), reply_markup=menu)
-    await state.finish()
+    logging.info(f"[{message.from_id}] Введен корректный номер авто {message.text}")
+    try:
+        driver = await drivers.update_driver_info(message.from_user.id, car_number=message.text.upper())
+        menu = make_driver_reg_menu(driver)
+        await message.answer(await messages.get_message("driver_correct_input"))
+        await message.answer(await messages.get_message("driver_reg_menu"), reply_markup=menu)
+        await state.finish()
+    except Exception as e:
+        logging.info(f"Номер {message.text} уже есть в базе или другая ошибка {e}")
+        return await message.answer(await messages.get_message("driver_wrong_car_number"))
 
 
 @dp.message_handler(state=DriverStates.CarNumber, content_types=types.ContentType.TEXT)
