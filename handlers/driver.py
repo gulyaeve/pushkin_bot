@@ -18,6 +18,7 @@ from utils.db_api.orders_db import OrderStatuses
 car_number_regexp = r"^[АВЕКМНОРСТXУABEKMHOPCTXYавекмнорстхуabekmhopctxy]{1}[0-9]{3}" \
                     r"[АВЕКМНОРСТXУABEKMHOPCTXYавекмнорстхуabekmhopctxy]{2}[0-9]{2,3}$"
 
+
 class DriverStates(StatesGroup):
     FIO = State()
     Phone = State()

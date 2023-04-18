@@ -3,6 +3,7 @@ from .admins import dp
 from .auth import dp
 from .taxi import dp
 from .driver import dp
+from .order_chat import dp
 
 from .any_text import dp
 
