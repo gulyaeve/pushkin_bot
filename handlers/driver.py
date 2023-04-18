@@ -273,20 +273,7 @@ async def driver_ready_menu(callback: types.CallbackQuery):
         await callback.answer(await messages.get_message("driver_info_validate_true"), show_alert=True)
         await callback.message.delete()
     else:
-        answer = "Необходимо заполнить:\n"
-        if not driver.fio:
-            answer += "ФИО\n"
-        if not driver.phone:
-            answer += "Номер телефона\n"
-        if not driver.passport:
-            answer += "Паспортные данные\n"
-        if not driver.passport_photo:
-            answer += "Фото паспорта\n"
-        if not driver.sts_photo_1:
-            answer += "Фото СТС (лицевая сторона)\n"
-        if not driver.sts_photo_2:
-            answer += "Фото СТС (оборотная сторона)\n"
-        await callback.answer(answer, show_alert=True)
+        await callback.answer(driver.make_info(), show_alert=True)
 
 
 # TODO: Добавить фильтр на активные заказы
@@ -382,4 +369,3 @@ async def driver_send_answer(message: types.Message, state: FSMContext):
         await message.answer('Ошибка при отправке')
         logging.info(f"Failed to send message: {e}")
     await state.finish()
-

@@ -36,6 +36,24 @@ class Driver:
               f"Номер машины: {self.car_number}"
         return msg
 
+    def make_info(self):
+        answer = "Необходимо заполнить:\n"
+        if not self.fio:
+            answer += "ФИО\n"
+        if not self.phone:
+            answer += "Номер телефона\n"
+        if not self.passport:
+            answer += "Паспортные данные\n"
+        if not self.car_number:
+            answer += "Номер авто\n"
+        if not self.passport_photo:
+            answer += "Фото паспорта\n"
+        if not self.sts_photo_1:
+            answer += "Фото СТС (лицевая сторона)\n"
+        if not self.sts_photo_2:
+            answer += "Фото СТС (оборотная сторона)\n"
+        return answer
+
 
 class DriversDB(Database):
     def __init__(self):
