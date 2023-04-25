@@ -11,6 +11,9 @@ from loader import dp, drivers, messages, users
 @dp.callback_query_handler(Text(startswith=DriverCallbacks.driver_manager_decline), AdminCheck())
 @dp.callback_query_handler(Text(startswith=DriverCallbacks.driver_manager_decline), ManagerCheck())
 async def manager_driver_decline(callback: types.CallbackQuery):
+    """
+    Отклонение водителя
+    """
     driver_id = int(callback.data.split("=")[1])
     driver = await drivers.get_driver_info(driver_id)
     await drivers.remove_driver(driver_id)
@@ -26,6 +29,9 @@ async def manager_driver_decline(callback: types.CallbackQuery):
 @dp.callback_query_handler(Text(startswith=DriverCallbacks.driver_manager_agree), AdminCheck())
 @dp.callback_query_handler(Text(startswith=DriverCallbacks.driver_manager_agree), ManagerCheck())
 async def manager_driver_accept(callback: types.CallbackQuery):
+    """
+    Одобрение водителя
+    """
     driver_id = int(callback.data.split("=")[1])
     driver = await drivers.get_driver_info(driver_id)
     driver_user_type = await users.select_user_type("driver")
