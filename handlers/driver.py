@@ -13,7 +13,7 @@ from keyboards.driver import reg_button, make_driver_reg_menu, DriverCallbacks, 
 from keyboards.keyboards import auth_phone
 from loader import dp, messages, drivers, users, orders, bot_info, openroute_api
 from utils.db_api.orders_db import OrderStatuses
-
+from utils.utilities import make_rus
 
 car_number_regexp = r"^[АВЕКМНОРСТXУABEKMHOPCTXYавекмнорстхуabekmhopctxy]{1}[0-9]{3}" \
                     r"[АВЕКМНОРСТXУABEKMHOPCTXYавекмнорстхуabekmhopctxy]{2}[0-9]{2,3}$"
@@ -172,7 +172,8 @@ async def driver_car_number_menu(callback: types.CallbackQuery):
 async def driver_input_car_number(message: types.Message, state: FSMContext):
     logging.info(f"[{message.from_id}] Введен корректный номер авто {message.text}")
     try:
-        driver = await drivers.update_driver_info(message.from_user.id, car_number=message.text.upper())
+        car_number = make_rus(message.text.upper())
+        driver = await drivers.update_driver_info(message.from_user.id, car_number=car_number)
         menu = make_driver_reg_menu(driver)
         await message.answer(await messages.get_message("driver_correct_input"))
         await message.answer(await messages.get_message("driver_reg_menu"), reply_markup=menu)

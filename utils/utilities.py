@@ -63,3 +63,25 @@ def taxi_fare_price(
     if price < min_price:
         price = min_price
     return price
+
+
+def make_rus(input_str: str) -> str:
+    input_str = input_str.upper()
+    replace_dict = {
+        "A": "А",
+        "B": "В",
+        "E": "Е",
+        "K": "К",
+        "M": "М",
+        "H": "Н",
+        "O": "О",
+        "P": "Р",
+        "C": "С",
+        "T": "Т",
+        "X": "Х",
+        "Y": "У"
+    }
+    for char in input_str:
+        if char in replace_dict.keys():
+            input_str = input_str.replace(char, replace_dict[char])
+    return input_str
