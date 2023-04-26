@@ -1,9 +1,12 @@
 import asyncio
 import datetime
 from dataclasses import dataclass
+from typing import Sequence
 
 import asyncpg
+from aiogram.types import InlineKeyboardButton
 
+from keyboards.manager import ManagerCallbacks
 from utils.db_api.db import Database
 
 
@@ -20,6 +23,33 @@ class Order:
     duration: int
     fare: str
     status: str
+    time_created: datetime.datetime
+
+    def make_button(self):
+        return InlineKeyboardButton(
+            text=f"№{self.id} 🗓️{self.time_created.strftime('%d.%m.%Y')} {self.validate_status(self.status)}",
+            callback_data=f"{ManagerCallbacks.manage_order_info}={self.id}",
+        )
+
+    @staticmethod
+    def validate_status(status):
+        type_emoji = status
+        match status:
+            case OrderStatuses.new:
+                type_emoji = "🆕"
+            case OrderStatuses.in_progress:
+                type_emoji = "🚀"
+            case OrderStatuses.finished:
+                type_emoji = "🏁"
+        return type_emoji
+
+
+class Orders:
+    def __init__(self, orders: Sequence[Order]):
+        self._orders = orders
+
+    def __getitem__(self, key: int) -> Order:
+        return self._orders[key]
 
 
 class OrderStatuses:
@@ -69,6 +99,7 @@ class OrdersDB(Database):
             duration=record['duration'],
             fare=record['fare'],
             status=record['status'],
+            time_created=record['time_created']
         )
 
     async def new_order(
@@ -131,5 +162,10 @@ class OrdersDB(Database):
     async def remove_driver_from_orders(self, driver_id: int):
         sql = "UPDATE orders SET driver_id=null WHERE driver_id=$1"
         return await self.execute(sql, driver_id, execute=True)
+
+    async def select_all_orders(self) -> Orders:
+        sql = "SELECT * FROM orders ORDER BY time_created DESC "
+        list_of_records = await self.execute(sql, fetch=True)
+        return Orders([await self._format_order(record) for record in list_of_records])
 
 

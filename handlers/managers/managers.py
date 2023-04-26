@@ -67,15 +67,18 @@ async def open_manager_menu(message: types.Message):
 @dp.callback_query_handler(ManagerCheck(), text=ManagerCallbacks.manage_drivers)
 async def manager_driver_menu(callback: types.CallbackQuery):
     await callback.answer("Выгружаю")
-    page_n = 0
-    if callback.data.startswith("driverspage_"):
-        page_n = int(callback.data.split("_")[1])
-    drivers_list = await drivers.select_all_drivers()
-    buttons_drivers = types.InlineKeyboardMarkup()
-    for driver in drivers_list:
-        buttons_drivers.add(driver.make_button())
-    drivers_inline = Paginator(callback_startswith="driverspage_", data=buttons_drivers)
-    await callback.message.edit_text("Готово:", reply_markup=drivers_inline(current_page=page_n))
+    try:
+        page_n = 0
+        if callback.data.startswith("driverspage_"):
+            page_n = int(callback.data.split("_")[1])
+        drivers_list = await drivers.select_all_drivers()
+        buttons_drivers = types.InlineKeyboardMarkup()
+        for driver in drivers_list:
+            buttons_drivers.add(driver.make_button())
+        drivers_inline = Paginator(callback_startswith="driverspage_", data=buttons_drivers)
+        await callback.message.edit_text("Готово:", reply_markup=drivers_inline(current_page=page_n))
+    except IndexError:
+        await callback.answer("Пусто", show_alert=True)
 
 
 @dp.callback_query_handler(Text(startswith=ManagerCallbacks.manage_driver_info))
@@ -122,3 +125,23 @@ async def manager_driver_remove(callback: types.CallbackQuery):
         logging.info(f"{callback.from_user.id} удалил водителя {driver.telegram_id}")
     else:
         await callback.answer("У этого водителя есть активный заказ", show_alert=True)
+
+
+@dp.callback_query_handler(Text(startswith='orderspage_'))
+@dp.callback_query_handler(ManagerCheck(), text=ManagerCallbacks.manage_orders)
+async def manager_get_orders(callback: types.CallbackQuery):
+    await callback.answer("Выгружаю")
+    try:
+        page_n = 0
+        if callback.data.startswith("orderspage_"):
+            page_n = int(callback.data.split("_")[1])
+        orders_list = await orders.select_all_orders()
+        buttons_orders = types.InlineKeyboardMarkup()
+        for order in orders_list:
+            buttons_orders.add(order.make_button())
+        orders_inline = Paginator(callback_startswith="orderspage_", data=buttons_orders)
+        await callback.message.edit_text("Готово:", reply_markup=orders_inline(current_page=page_n))
+    except IndexError:
+        await callback.answer("Пусто", show_alert=True)
+
+
