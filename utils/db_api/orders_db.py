@@ -114,12 +114,22 @@ class OrdersDB(Database):
             await self.execute(sql, order_id, value, execute=True)
         return await self.get_order_info(order_id)
 
-    async def find_active_order_for_driver(self, driver_id: int) -> Order:
+    async def find_active_order_for_driver(self, driver_id: int) -> Order | None:
         sql = "SELECT * FROM orders WHERE driver_id=$1 AND status='in_progress'"
-        return await self._format_order(await self.execute(sql, driver_id, fetchrow=True))
+        try:
+            return await self._format_order(await self.execute(sql, driver_id, fetchrow=True))
+        except TypeError:
+            return None
 
-    async def find_active_order_for_customer(self, customer_id: int) -> Order:
+    async def find_active_order_for_customer(self, customer_id: int) -> Order | None:
         sql = "SELECT * FROM orders WHERE customer_id=$1 AND status='in_progress'"
-        return await self._format_order(await self.execute(sql, customer_id, fetchrow=True))
+        try:
+            return await self._format_order(await self.execute(sql, customer_id, fetchrow=True))
+        except TypeError:
+            return None
+
+    async def remove_driver_from_orders(self, driver_id: int):
+        sql = "UPDATE orders SET driver_id=null WHERE driver_id=$1"
+        return await self.execute(sql, driver_id, execute=True)
 
 

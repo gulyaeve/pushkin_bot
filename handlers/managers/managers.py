@@ -11,7 +11,7 @@ from aiogram_inline_paginations.paginator import Paginator
 from config import Config
 from filters import ManagerCheck
 from keyboards.manager import main_manager_menu, ManagerCallbacks, make_driver_menu
-from loader import dp, users, drivers
+from loader import dp, users, drivers, orders
 
 
 async def copy_to_managers(message: types.Message):
@@ -112,9 +112,13 @@ async def manager_get_driver_docs(callback: types.CallbackQuery):
 async def manager_driver_remove(callback: types.CallbackQuery):
     driver_id = int(callback.data.split("=")[1])
     driver = await drivers.get_driver_info(driver_id)
-    # TODO: Проверять на активный заказ
-    # user_user_type = await users.select_user_type("user")
-    # await users.update_user_type(user_user_type, driver.telegram_id)
-    # await drivers.remove_driver(driver.telegram_id)
-    # await callback.answer(f"{str(driver)}\n\nЗАБЛОКИРОВАН")
-    logging.info(f"{callback.from_user.id} удалил водителя {driver.telegram_id}")
+    active_order = await orders.find_active_order_for_driver(driver.telegram_id)
+    if not active_order:
+        await orders.remove_driver_from_orders(driver.telegram_id)
+        user_user_type = await users.select_user_type("user")
+        await users.update_user_type(user_user_type, driver.telegram_id)
+        await drivers.remove_driver(driver.telegram_id)
+        await callback.answer(f"{str(driver)}\n\nЗАБЛОКИРОВАН", show_alert=True)
+        logging.info(f"{callback.from_user.id} удалил водителя {driver.telegram_id}")
+    else:
+        await callback.answer("У этого водителя есть активный заказ", show_alert=True)
