@@ -195,13 +195,14 @@ async def taxi_order_confirm(message: types.Message, state: FSMContext):
         latitude=float(data['destination_latitude']),
         longitude=float(data['destination_longitude']),
     )
+    address = await osm_api.get_address(new_order.departure_latitude, new_order.departure_longitude)
     await dp.bot.send_message(
         chat_id=taxi_fare.chat_id,
         text=f"Новый заказ №{new_order.id}:\n"
              f"Примерное расстояние: {distance} км\n"
              f"Примерное время в пути (без пробок): {duration} минут\n"
              f"Тариф: {taxi_fare.name}\n\n"
-             f"Адрес подачи: {osm_api.get_address(new_order.departure_latitude, new_order.departure_longitude)}",
+             f"Адрес подачи: {address}",
         reply_markup=make_confirm_button(new_order.id),
     )
     await message.answer(

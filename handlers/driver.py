@@ -51,13 +51,14 @@ async def driver_order_start(message: types.Message):
         latitude=order.destination_latitude,
         longitude=order.destination_longitude,
     )
+    address = await osm_api.get_address(order.departure_latitude, order.departure_longitude)
     await message.answer(
         f"Активный заказ №{order.id}:\n"
         f"Примерное расстояние: {order.distance} км\n"
         f"Примерное время в пути (без пробок): {order.duration} минут\n"
         f"Тариф: {order.fare}\n"
         f"Клиенту можно отправлять сообщения прямо в этом диалоге.\n\n"
-        f"Адрес подачи: {osm_api.get_address(order.departure_latitude, order.departure_longitude)}",
+        f"Адрес подачи: {address}",
         reply_markup=make_order_menu(order_id=order.id)
     )
 
