@@ -9,7 +9,7 @@ from aiogram.types import ChatType
 from filters import ActiveOrderCheck
 from keyboards.driver import make_confirm_button
 from keyboards.keyboards import location_button, request_submit
-from loader import dp, openroute_api, taxi_fares, messages, orders, bot_info
+from loader import dp, openroute_api, taxi_fares, messages, orders, bot_info, osm_api
 from utils.db_api.orders_db import OrderStatuses
 
 
@@ -200,7 +200,8 @@ async def taxi_order_confirm(message: types.Message, state: FSMContext):
         text=f"Новый заказ №{new_order.id}:\n"
              f"Примерное расстояние: {distance} км\n"
              f"Примерное время в пути (без пробок): {duration} минут\n"
-             f"Тариф: {taxi_fare.name}\n",
+             f"Тариф: {taxi_fare.name}\n\n"
+             f"Адрес подачи: {osm_api.get_address(new_order.departure_latitude, new_order.departure_longitude)}",
         reply_markup=make_confirm_button(new_order.id),
     )
     await message.answer(
