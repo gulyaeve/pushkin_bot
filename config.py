@@ -60,3 +60,5 @@ class Config:
         OPENROUTE_API_LINK = env.str("OPENROUTE_API_LINK")
         OPENROUTE_API_TOKEN = env.str("OPENROUTE_API_TOKEN")
 
+    OSM_API_SEARCH_LINK = env.str("OSM_API_SEARCH_LINK")
+

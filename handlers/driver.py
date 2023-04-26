@@ -11,7 +11,7 @@ from filters import DriverCheck, ActiveOrderCheck
 from keyboards.driver import reg_button, make_driver_reg_menu, DriverCallbacks, make_manager_view, driver_menu, \
     make_order_menu
 from keyboards.keyboards import auth_phone
-from loader import dp, messages, drivers, users, orders, bot_info, openroute_api
+from loader import dp, messages, drivers, users, orders, bot_info, openroute_api, osm_api
 from utils.db_api.orders_db import OrderStatuses
 from utils.utilities import make_rus
 
@@ -56,7 +56,8 @@ async def driver_order_start(message: types.Message):
         f"Примерное расстояние: {order.distance} км\n"
         f"Примерное время в пути (без пробок): {order.duration} минут\n"
         f"Тариф: {order.fare}\n"
-        f"Клиенту можно отправлять сообщения прямо в этом диалоге.",
+        f"Клиенту можно отправлять сообщения прямо в этом диалоге.\n\n"
+        f"Адрес подачи: {osm_api.get_address(order.departure_latitude, order.departure_longitude)}",
         reply_markup=make_order_menu(order_id=order.id)
     )
 

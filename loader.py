@@ -12,6 +12,7 @@ from utils.db_api.usersdb import UsersDB
 from utils.db_api.messages import Messages
 from utils.admin_page_rest_api import AdminPageRestAPI
 from utils.openroute_api import OpenrouteApi
+from utils.osmapisearch_api import OSMSearchApi
 
 # ChatBot objects
 if Config.proxy_url:
@@ -50,6 +51,7 @@ else:
     admin_api = None
 
 openroute_api = OpenrouteApi()
+osm_api = OSMSearchApi()
 taxi_fares = TaxiFaresDB()
 drivers = DriversDB()
 orders = OrdersDB()
