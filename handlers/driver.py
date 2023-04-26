@@ -345,7 +345,9 @@ async def driver_order_confirm(callback: types.CallbackQuery):
     )
     await dp.bot.send_message(
         chat_id=changed_order.customer_id,
-        text=f"Водитель {driver.fio} начал выполнение вашего заказа. Вы можете общаться с ним прямо в этом диалоге.",
+        text=f"Водитель <b>{driver.fio}</b> автомобиля с госномером <b>{driver.car_number}</b> начал выполнение "
+             f"вашего заказа.\n"
+             f"Вы можете общаться с ним прямо в этом диалоге.",
         # reply_markup=make_customer_answer_button(order_id=changed_order.id),
     )
     await callback.message.delete_reply_markup()
@@ -360,10 +362,11 @@ async def no_driver_order_confirm(callback: types.CallbackQuery):
 async def driver_on_start_location(callback: types.CallbackQuery):
     order_id = int(callback.data.split("=")[1])
     order = await orders.get_order_info(order_id)
+    driver = await drivers.get_driver_info(order.driver_id)
     logging.info(f"По заказу {order.id} водитель {order.driver_id} приехал к клиенту {order.customer_id}")
     await dp.bot.send_message(
         chat_id=order.customer_id,
-        text=f"Водитель ожидает вас 🚖",
+        text=f"Водитель ожидает вас 🚖<b>{driver.car_number}</b>",
     )
     await callback.answer("Клиенту отправлено уведомление о подаче", show_alert=True)
 
