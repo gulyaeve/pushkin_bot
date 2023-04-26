@@ -1,8 +1,11 @@
 import asyncio
 from dataclasses import dataclass
+from typing import Sequence
 
 import asyncpg
+from aiogram.types import InlineKeyboardButton
 
+from keyboards.manager import ManagerCallbacks
 from utils.db_api.db import Database
 
 
@@ -53,6 +56,20 @@ class Driver:
         if not self.sts_photo_2:
             answer += "Фото СТС (оборотная сторона)\n"
         return answer
+
+    def make_button(self):
+        return InlineKeyboardButton(
+            text=f"{self.fio} {self.car_number}",
+            callback_data=f"{ManagerCallbacks.manage_driver_info}={self.telegram_id}",
+        )
+
+
+class Drivers:
+    def __init__(self, drivers: Sequence[Driver]):
+        self._drivers = drivers
+
+    def __getitem__(self, key: int) -> Driver:
+        return self._drivers[key]
 
 
 class DriversDB(Database):
@@ -113,6 +130,11 @@ class DriversDB(Database):
 
     async def remove_driver(self, telegram_id: int):
         await self.execute("DELETE FROM drivers WHERE telegram_id=$1", telegram_id, execute=True)
+
+    async def select_all_drivers(self) -> Drivers:
+        sql = "SELECT * FROM drivers"
+        list_of_records = await self.execute(sql, fetch=True)
+        return Drivers([await self._format_driver(record) for record in list_of_records])
 
 
 # loop = asyncio.get_event_loop()

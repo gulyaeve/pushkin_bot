@@ -1,10 +1,17 @@
+import logging
+
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters import Regexp
+from aiogram.dispatcher.filters import Regexp, Text
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from logging import log, INFO, WARN
 
-from loader import dp, users
+from aiogram_inline_paginations.paginator import Paginator
+
+from config import Config
+from filters import ManagerCheck
+from keyboards.manager import main_manager_menu, ManagerCallbacks, make_driver_menu
+from loader import dp, users, drivers
 
 
 async def copy_to_managers(message: types.Message):
@@ -46,3 +53,68 @@ async def send_answer_to_text(message: types.Message, state: FSMContext):
         await message.answer('Ошибка при отправке')
         log(INFO, f"Failed to send message: {e}")
     await state.finish()
+
+
+@dp.message_handler(ManagerCheck(), commands=['manager', 'manage'])
+async def open_manager_menu(message: types.Message):
+    await message.answer(
+        text="Меню менеджера",
+        reply_markup=main_manager_menu,
+    )
+
+
+@dp.callback_query_handler(Text(startswith='driverspage_'))
+@dp.callback_query_handler(ManagerCheck(), text=ManagerCallbacks.manage_drivers)
+async def manager_driver_menu(callback: types.CallbackQuery):
+    await callback.answer("Выгружаю")
+    page_n = 0
+    if callback.data.startswith("driverspage_"):
+        page_n = int(callback.data.split("_")[1])
+    drivers_list = await drivers.select_all_drivers()
+    buttons_drivers = types.InlineKeyboardMarkup()
+    for driver in drivers_list:
+        buttons_drivers.add(driver.make_button())
+    drivers_inline = Paginator(callback_startswith="driverspage_", data=buttons_drivers)
+    await callback.message.edit_text("Готово:", reply_markup=drivers_inline(current_page=page_n))
+
+
+@dp.callback_query_handler(Text(startswith=ManagerCallbacks.manage_driver_info))
+async def manager_select_driver(callback: types.CallbackQuery):
+    driver_id = int(callback.data.split("=")[1])
+    driver = await drivers.get_driver_info(driver_id)
+    await callback.message.edit_text(str(driver), reply_markup=make_driver_menu(driver.telegram_id))
+
+
+@dp.callback_query_handler(Text(startswith=ManagerCallbacks.manage_driver_docs))
+async def manager_get_driver_docs(callback: types.CallbackQuery):
+    await callback.message.delete()
+    driver_id = int(callback.data.split("=")[1])
+    driver = await drivers.get_driver_info(driver_id)
+    await callback.message.answer_media_group(
+        media=types.MediaGroup(
+            [
+                types.InputMediaPhoto(
+                    types.InputFile(f"{Config.MEDIA}/{driver.passport_photo}")
+                ),
+                types.InputMediaPhoto(
+                    types.InputFile(f"{Config.MEDIA}/{driver.sts_photo_1}")
+                ),
+                types.InputMediaPhoto(
+                    types.InputFile(f"{Config.MEDIA}/{driver.sts_photo_2}")
+                ),
+            ]
+        ),
+    )
+    await callback.message.answer(str(driver), reply_markup=make_driver_menu(driver.telegram_id))
+
+
+@dp.callback_query_handler(Text(startswith=ManagerCallbacks.manage_driver_remove))
+async def manager_driver_remove(callback: types.CallbackQuery):
+    driver_id = int(callback.data.split("=")[1])
+    driver = await drivers.get_driver_info(driver_id)
+    # TODO: Проверять на активный заказ
+    # user_user_type = await users.select_user_type("user")
+    # await users.update_user_type(user_user_type, driver.telegram_id)
+    # await drivers.remove_driver(driver.telegram_id)
+    # await callback.answer(f"{str(driver)}\n\nЗАБЛОКИРОВАН")
+    logging.info(f"{callback.from_user.id} удалил водителя {driver.telegram_id}")
