@@ -136,7 +136,6 @@ async def taxi_set_departure(callback: types.CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(Text(startswith="fare="), state=OrderTaxi.Fare)
 async def taxi_set_fare(callback: types.CallbackQuery, state: FSMContext):
     fare = callback.data.split("=")[1]
-    # data = await state.get_data()
     async with state.proxy() as data:
         data['fare'] = fare
     taxi_fare = await taxi_fares.select_fare_by_name(fare)

@@ -12,7 +12,7 @@ async def driver_chat(message: types.Message):
     active_order = await orders.find_active_order_for_driver(message.from_id)
     await dp.bot.send_message(
         chat_id=active_order.customer_id,
-        text="Водитель сообщает:"
+        text="<i>Водитель сообщает:</i>"
     )
     await dp.bot.copy_message(
         chat_id=active_order.customer_id,
@@ -28,7 +28,7 @@ async def customer_chat(message: types.Message):
     active_order = await orders.find_active_order_for_customer(message.from_id)
     await dp.bot.send_message(
         chat_id=active_order.driver_id,
-        text="Клиент сообщает:"
+        text="<i>Клиент сообщает:</i>"
     )
     await dp.bot.copy_message(
         chat_id=active_order.driver_id,
