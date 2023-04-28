@@ -63,6 +63,14 @@ async def open_manager_menu(message: types.Message):
     )
 
 
+@dp.callback_query_handler(ManagerCheck(), text=ManagerCallbacks.manage_menu)
+async def open_manager_menu_callback(callback: types.CallbackQuery):
+    await callback.message.answer(
+        text="Меню менеджера",
+        reply_markup=main_manager_menu,
+    )
+
+
 @dp.callback_query_handler(Text(startswith='driverspage_'))
 @dp.callback_query_handler(ManagerCheck(), text=ManagerCallbacks.manage_drivers)
 async def manager_driver_menu(callback: types.CallbackQuery):
@@ -75,6 +83,7 @@ async def manager_driver_menu(callback: types.CallbackQuery):
         buttons_drivers = types.InlineKeyboardMarkup()
         for driver in drivers_list:
             buttons_drivers.add(driver.make_button())
+        buttons_drivers.add(InlineKeyboardButton("◀️Назад", callback_data=ManagerCallbacks.manage_menu))
         drivers_inline = Paginator(callback_startswith="driverspage_", data=buttons_drivers)
         await callback.message.edit_text("Готово:", reply_markup=drivers_inline(current_page=page_n))
     except IndexError:
@@ -139,6 +148,7 @@ async def manager_get_dates(callback: types.CallbackQuery):
         buttons_orders_dates = types.InlineKeyboardMarkup()
         for date in orders_dates:
             buttons_orders_dates.add(orders.make_inline_button_for_date(date))
+        buttons_orders_dates.add(InlineKeyboardButton("◀️Назад", callback_data=ManagerCallbacks.manage_menu))
         orders_inline = Paginator(callback_startswith="ordersdates_", data=buttons_orders_dates)
         await callback.message.edit_text("Выберите день:", reply_markup=orders_inline(current_page=page_n))
     except IndexError:

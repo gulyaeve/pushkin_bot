@@ -2,6 +2,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
 class ManagerCallbacks:
+    manage_menu = "manage_menu"
     manage_drivers = "manage_drivers"
     manage_orders = "manage_orders"
     manage_order_dates = "manage_order_dates"
