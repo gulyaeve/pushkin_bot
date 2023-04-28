@@ -28,11 +28,13 @@ class Order:
     time_finished: datetime.datetime
 
     def __str__(self):
+        time_assigned = self.time_assigned.strftime('%d.%m.%Y %H:%M') if self.time_assigned is not None else "-"
+        time_finished = self.time_finished.strftime('%d.%m.%Y %H:%M') if self.time_finished is not None else "-"
         return f"<b>Информация о заказе №{self.id}:</b>\n\n" \
                f"Расстояние: <i>{self.distance}</i>\n" \
                f"Время создания: <i>{self.time_created.strftime('%d.%m.%Y %H:%M')}</i>\n" \
-               f"Водитель принял: <i>{self.time_assigned.strftime('%d.%m.%Y %H:%M')}</i>\n" \
-               f"Время завершения: <i>{self.time_finished.strftime('%d.%m.%Y %H:%M')}</i>\n\n" \
+               f"Водитель принял: <i>{time_assigned}</i>\n" \
+               f"Время завершения: <i>{time_finished}</i>\n\n" \
                f"Клиент: tg://user?id={self.customer_id}\n" \
                f"Водитель: tg://user?id={self.driver_id}\n"
 
