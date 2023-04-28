@@ -65,7 +65,7 @@ async def open_manager_menu(message: types.Message):
 
 @dp.callback_query_handler(ManagerCheck(), text=ManagerCallbacks.manage_menu)
 async def open_manager_menu_callback(callback: types.CallbackQuery):
-    await callback.message.answer(
+    await callback.message.edit_text(
         text="Меню менеджера",
         reply_markup=main_manager_menu,
     )
