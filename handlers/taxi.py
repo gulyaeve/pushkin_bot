@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 from aiogram import types
@@ -182,6 +183,7 @@ async def taxi_order_confirm(message: types.Message, state: FSMContext):
         duration=duration,
         fare=taxi_fare.id,
         status=OrderStatuses.new,
+        time_created=datetime.datetime.now(),
     )
     logging.info(f"Order saved {new_order}")
     await dp.bot.send_location(

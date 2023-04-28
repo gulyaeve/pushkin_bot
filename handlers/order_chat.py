@@ -20,7 +20,7 @@ async def driver_chat(message: types.Message):
         message_id=message.message_id
     )
     logging.info(f'От водителя [{active_order.driver_id}] пользователю [{active_order.customer_id}] отправлено: {message.message_id}')
-    await message.answer('Сообщение отправлено клиенту')
+    await message.answer('<i>Сообщение отправлено клиенту</i>')
 
 
 @dp.message_handler(ActiveOrderCheck(), ChatTypeFilter(chat_type=types.ChatType.PRIVATE))
@@ -36,5 +36,5 @@ async def customer_chat(message: types.Message):
         message_id=message.message_id
     )
     logging.info(f'От пользователя [{active_order.customer_id}] водителю [{active_order.driver_id}] отправлено: {message.message_id}')
-    await message.answer('Сообщение отправлено')
+    await message.answer('<i>Сообщение отправлено</i>')
 
