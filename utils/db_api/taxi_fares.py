@@ -62,6 +62,11 @@ class TaxiFaresDB(Database):
         record = await self.execute(sql, name, fetchrow=True)
         return await self._format_fare(record)
 
+    async def select_fare_by_id(self, id: int) -> TaxiFare:
+        sql = "SELECT * FROM taxi_fares WHERE id=$1"
+        record = await self.execute(sql, id, fetchrow=True)
+        return await self._format_fare(record)
+
     async def add_fare(
             self,
             name: str,

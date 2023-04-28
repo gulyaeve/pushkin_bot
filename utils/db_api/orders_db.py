@@ -24,10 +24,21 @@ class Order:
     fare: str
     status: str
     time_created: datetime.datetime
+    time_assigned: datetime.datetime
+    time_finished: datetime.datetime
+
+    def __str__(self):
+        return f"<b>Информация о заказе №{self.id}:</b>\n\n" \
+               f"Расстояние: <i>{self.distance}</i>\n" \
+               f"Время создания: <i>{self.time_created.strftime('%d.%m.%Y %H:%M')}</i>\n" \
+               f"Водитель принял: <i>{self.time_assigned.strftime('%d.%m.%Y %H:%M')}</i>\n" \
+               f"Время завершения: <i>{self.time_finished.strftime('%d.%m.%Y %H:%M')}</i>\n\n" \
+               f"Клиент: tg://user?id={self.customer_id}\n" \
+               f"Водитель: tg://user?id={self.driver_id}\n"
 
     def make_button(self):
         return InlineKeyboardButton(
-            text=f"№{self.id} 🗓️{self.time_created.strftime('%d.%m.%Y')} {self.validate_status(self.status)}",
+            text=f"№{self.id} {self.validate_status(self.status)}",
             callback_data=f"{ManagerCallbacks.manage_order_info}={self.id}",
         )
 
@@ -36,11 +47,11 @@ class Order:
         type_emoji = status
         match status:
             case OrderStatuses.new:
-                type_emoji = "🆕"
+                type_emoji = "Создан 🆕"
             case OrderStatuses.in_progress:
-                type_emoji = "🚀"
+                type_emoji = "Выполняется 🚀"
             case OrderStatuses.finished:
-                type_emoji = "🏁"
+                type_emoji = "Завершён 🏁"
         return type_emoji
 
 
@@ -99,7 +110,9 @@ class OrdersDB(Database):
             duration=record['duration'],
             fare=record['fare'],
             status=record['status'],
-            time_created=record['time_created']
+            time_created=record['time_created'],
+            time_assigned=record['time_assigned'],
+            time_finished=record['time_finished'],
         )
 
     async def new_order(
@@ -168,4 +181,21 @@ class OrdersDB(Database):
         list_of_records = await self.execute(sql, fetch=True)
         return Orders([await self._format_order(record) for record in list_of_records])
 
+    async def select_all_dates_created(self) -> [datetime.date]:
+        sql = "SELECT DISTINCT time_created::date FROM orders ORDER BY time_created DESC "
+        list_of_records = await self.execute(sql, fetch=True)
+        dates = [record['time_created'] for record in list_of_records]
+        return dates
 
+    async def select_orders_by_date_created(self, date: str) -> Orders:
+        date_f = datetime.datetime.strptime(date, '%Y-%m-%d')
+        sql = "SELECT * FROM orders WHERE time_created::date=$1 ORDER BY time_created DESC "
+        list_of_records = await self.execute(sql, date_f, fetch=True)
+        return Orders([await self._format_order(record) for record in list_of_records])
+
+    @staticmethod
+    def make_inline_button_for_date(date: datetime.date) -> InlineKeyboardButton:
+        return InlineKeyboardButton(
+            text=f"🗓️{date.strftime('%d.%m.%Y')}",
+            callback_data=f"{ManagerCallbacks.manage_order_dates}={date.strftime('%Y-%m-%d')}"
+        )

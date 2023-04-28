@@ -11,7 +11,7 @@ from aiogram_inline_paginations.paginator import Paginator
 from config import Config
 from filters import ManagerCheck
 from keyboards.manager import main_manager_menu, ManagerCallbacks, make_driver_menu
-from loader import dp, users, drivers, orders
+from loader import dp, users, drivers, orders, taxi_fares, osm_api
 
 
 async def copy_to_managers(message: types.Message):
@@ -127,21 +127,57 @@ async def manager_driver_remove(callback: types.CallbackQuery):
         await callback.answer("У этого водителя есть активный заказ", show_alert=True)
 
 
-@dp.callback_query_handler(Text(startswith='orderspage_'))
+@dp.callback_query_handler(Text(startswith='ordersdates_'))
 @dp.callback_query_handler(ManagerCheck(), text=ManagerCallbacks.manage_orders)
+async def manager_get_dates(callback: types.CallbackQuery):
+    await callback.answer("Выгружаю")
+    try:
+        page_n = 0
+        if callback.data.startswith("ordersdates_"):
+            page_n = int(callback.data.split("_")[1])
+        orders_dates = await orders.select_all_dates_created()
+        buttons_orders_dates = types.InlineKeyboardMarkup()
+        for date in orders_dates:
+            buttons_orders_dates.add(orders.make_inline_button_for_date(date))
+        orders_inline = Paginator(callback_startswith="ordersdates_", data=buttons_orders_dates)
+        await callback.message.edit_text("Выберите день:", reply_markup=orders_inline(current_page=page_n))
+    except IndexError:
+        await callback.answer("Пусто", show_alert=True)
+
+
+@dp.callback_query_handler(Text(startswith='orderspage_'))
+@dp.callback_query_handler(ManagerCheck(), Text(startswith=ManagerCallbacks.manage_order_dates))
 async def manager_get_orders(callback: types.CallbackQuery):
+    date = callback.data.split("=")[1]
     await callback.answer("Выгружаю")
     try:
         page_n = 0
         if callback.data.startswith("orderspage_"):
             page_n = int(callback.data.split("_")[1])
-        orders_list = await orders.select_all_orders()
+        orders_list = await orders.select_orders_by_date_created(date)
         buttons_orders = types.InlineKeyboardMarkup()
         for order in orders_list:
             buttons_orders.add(order.make_button())
+        buttons_orders.add(InlineKeyboardButton("◀️Назад", callback_data=ManagerCallbacks.manage_orders))
         orders_inline = Paginator(callback_startswith="orderspage_", data=buttons_orders)
         await callback.message.edit_text("Готово:", reply_markup=orders_inline(current_page=page_n))
     except IndexError:
         await callback.answer("Пусто", show_alert=True)
 
+
+@dp.callback_query_handler(Text(startswith=ManagerCallbacks.manage_order_info))
+async def manager_get_order_info(callback: types.CallbackQuery):
+    order_id = int(callback.data.split("=")[1])
+    order = await orders.get_order_info(order_id)
+    taxi_fare = await taxi_fares.select_fare_by_id(order.fare)
+    msg = f"{str(order)}\nТариф: <i>{taxi_fare.name}</i>"
+    buttons_back = types.InlineKeyboardMarkup()
+    buttons_back.add(InlineKeyboardButton("◀️Назад", callback_data=ManagerCallbacks.manage_orders))
+    address_departure = await osm_api.get_address(order.departure_latitude, order.departure_longitude)
+    address_destination = await osm_api.get_address(order.destination_latitude, order.destination_longitude)
+    await callback.message.answer(f"<b>Заказ №{order.id}. Старт</b> 🚩:\n<i>{address_departure}:</i>")
+    await callback.message.answer_location(order.departure_latitude, order.departure_longitude)
+    await callback.message.answer(f"<b>Заказ №{order.id}. Финиш</b> 🏁:\n<i>{address_destination}:</i>")
+    await callback.message.answer_location(order.destination_latitude, order.destination_longitude)
+    await callback.message.answer(msg, reply_markup=buttons_back)
 

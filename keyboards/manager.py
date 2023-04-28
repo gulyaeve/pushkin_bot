@@ -4,6 +4,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 class ManagerCallbacks:
     manage_drivers = "manage_drivers"
     manage_orders = "manage_orders"
+    manage_order_dates = "manage_order_dates"
     manage_order_info = "manage_order_info"
     manage_driver_info = "manage_driver_info"
     manage_driver_docs = "manage_driver_docs"

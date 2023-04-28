@@ -4,6 +4,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from logging import log, INFO
 
+from filters import ManagerCheck
 from loader import dp, messages
 from utils.commands import help_message
 
@@ -12,6 +13,18 @@ from utils.commands import help_message
 async def help_command(message: types.Message):
     # help_message = await messages.get_message("help_message")
     await message.answer(help_message)
+
+
+@dp.message_handler(ManagerCheck(), commands=['start'])
+async def cmd_start_manager(message: types.Message):
+    """
+   Conversation's entry point for manager
+   """
+    log(INFO, f"[{message.from_user.id=}] нажал START FOR MANAGER.")
+    welcome_message = await messages.get_message("welcome")
+    await message.reply(welcome_message.format((await dp.bot.get_me()).full_name))
+    await message.answer(await messages.get_message("welcome_help_hint"))
+    await message.answer("Вам доступна команда: /manager")
 
 
 @dp.message_handler(commands=['start'])
