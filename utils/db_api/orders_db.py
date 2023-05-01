@@ -34,7 +34,7 @@ class Order:
                f"Расстояние: <i>{self.distance}</i>\n" \
                f"Время создания: <i>{self.time_created.strftime('%d.%m.%Y %H:%M')}</i>\n" \
                f"Водитель принял: <i>{time_assigned}</i>\n" \
-               f"Время завершения: <i>{time_finished}</i>\n\n"
+               f"Время завершения: <i>{time_finished}</i>\n"
 
     def make_button(self):
         return InlineKeyboardButton(
