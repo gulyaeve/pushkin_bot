@@ -180,7 +180,8 @@ async def manager_get_order_info(callback: types.CallbackQuery):
     order_id = int(callback.data.split("=")[1])
     order = await orders.get_order_info(order_id)
     taxi_fare = await taxi_fares.select_fare_by_id(order.fare)
-    msg = f"{str(order)}\nТариф: <i>{taxi_fare.name}</i>"
+    driver = await drivers.get_driver_info(order.driver_id)
+    msg = f"{str(order)}\nТариф: <i>{taxi_fare.name}</i>\nФИО водителя: <i>{driver.fio}</i>"
     buttons_back = types.InlineKeyboardMarkup()
     buttons_back.add(InlineKeyboardButton("Водитель", f"tg://user?id={order.driver_id}"))
     buttons_back.add(InlineKeyboardButton("Пассажир", f"tg://user?id={order.customer_id}"))
