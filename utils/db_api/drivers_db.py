@@ -94,17 +94,20 @@ class DriversDB(Database):
         await self.execute(sql, execute=True)
 
     @staticmethod
-    async def _format_driver(record: asyncpg.Record) -> Driver:
-        return Driver(
-            telegram_id=record['telegram_id'],
-            phone=record['phone'],
-            fio=record['fio'],
-            passport=record['passport'],
-            passport_photo=record['passport_photo'],
-            sts_photo_1=record['sts_photo_1'],
-            sts_photo_2=record['sts_photo_2'],
-            car_number=record['car_number']
-        )
+    async def _format_driver(record: asyncpg.Record) -> Driver | None:
+        try:
+            return Driver(
+                telegram_id=record['telegram_id'],
+                phone=record['phone'],
+                fio=record['fio'],
+                passport=record['passport'],
+                passport_photo=record['passport_photo'],
+                sts_photo_1=record['sts_photo_1'],
+                sts_photo_2=record['sts_photo_2'],
+                car_number=record['car_number']
+            )
+        except TypeError:
+            return None
 
     async def _select_driver(self, telegram_id: int) -> asyncpg.Record:
         sql = "SELECT * FROM drivers WHERE telegram_id=$1"

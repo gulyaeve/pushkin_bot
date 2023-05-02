@@ -181,9 +181,12 @@ async def manager_get_order_info(callback: types.CallbackQuery):
     order = await orders.get_order_info(order_id)
     taxi_fare = await taxi_fares.select_fare_by_id(order.fare)
     driver = await drivers.get_driver_info(order.driver_id)
-    msg = f"{str(order)}\nТариф: <i>{taxi_fare.name}</i>\nФИО водителя: <i>{driver.fio}</i>"
+    msg = f"{str(order)}\nТариф: <i>{taxi_fare.name}</i>"
+    if driver:
+        msg += f"\nФИО водителя: <i>{driver.fio}</i>"
     buttons_back = types.InlineKeyboardMarkup()
-    buttons_back.add(InlineKeyboardButton("Водитель", f"tg://user?id={order.driver_id}"))
+    if order.driver_id:
+        buttons_back.add(InlineKeyboardButton("Водитель", f"tg://user?id={order.driver_id}"))
     buttons_back.add(InlineKeyboardButton("Пассажир", f"tg://user?id={order.customer_id}"))
     buttons_back.add(InlineKeyboardButton("◀️Назад", callback_data=ManagerCallbacks.manage_orders))
     address_departure = await osm_api.get_address(order.departure_latitude, order.departure_longitude)
