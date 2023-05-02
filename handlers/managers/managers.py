@@ -182,15 +182,17 @@ async def manager_get_order_info(callback: types.CallbackQuery):
     taxi_fare = await taxi_fares.select_fare_by_id(order.fare)
     driver = await drivers.get_driver_info(order.driver_id)
     msg = f"{str(order)}\nТариф: <i>{taxi_fare.name}</i>"
+
+    buttons_back = types.InlineKeyboardMarkup()
     if driver:
         msg += f"\nФИО водителя: <i>{driver.fio}</i>"
-    buttons_back = types.InlineKeyboardMarkup()
-    if order.driver_id:
-        buttons_back.add(InlineKeyboardButton("Водитель", f"tg://user?id={order.driver_id}"))
-    buttons_back.add(InlineKeyboardButton("Пассажир", f"tg://user?id={order.customer_id}"))
+        buttons_back.add(InlineKeyboardButton("🚕Водитель", f"tg://user?id={driver.telegram_id}"))
+    buttons_back.add(InlineKeyboardButton("👤Пассажир", f"tg://user?id={order.customer_id}"))
     buttons_back.add(InlineKeyboardButton("◀️Назад", callback_data=ManagerCallbacks.manage_orders))
+
     address_departure = await osm_api.get_address(order.departure_latitude, order.departure_longitude)
     address_destination = await osm_api.get_address(order.destination_latitude, order.destination_longitude)
+
     await callback.message.answer(f"<b>Заказ №{order.id}. Старт</b> 🚩:\n<i>{address_departure}:</i>")
     await callback.message.answer_location(order.departure_latitude, order.departure_longitude)
     await callback.message.answer(f"<b>Заказ №{order.id}. Финиш</b> 🏁:\n<i>{address_destination}:</i>")
