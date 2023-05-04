@@ -36,7 +36,7 @@ services:
     networks:
       - botnet
     depends_on:
-      - db
+      - database
       - redis
 
 volumes:
