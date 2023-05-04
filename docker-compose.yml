@@ -3,7 +3,7 @@ version: '3.9'
 services:
   database:
     env_file:
-      - ".env.dev"
+      - ".env"
     container_name: "database"
     image: postgres:latest
     networks:
@@ -24,13 +24,13 @@ services:
       - botnet
 
   bot:
-    container_name: "templatebot_dev"
+    container_name: "pushkinbot_prod"
     build:
       context: .
 #    network_mode: host
     restart: always
     env_file:
-      - ".env.dev"
+      - ".env"
     volumes:
       - .:/src
     networks:
